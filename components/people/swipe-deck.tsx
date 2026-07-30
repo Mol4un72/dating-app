@@ -1,10 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { FiltersModal } from '@/components/people/filters-modal'
 import { MapPin, BadgeCheck, SlidersHorizontal } from 'lucide-react'
 import { type Person } from '@/lib/data'
 import { cn } from '@/lib/utils'
+
+type TapHeart = {
+  id: number
+  x: number
+  y: number
+  rotate: number
+}
 
 export function SwipeDeck({ people }: { people: Person[] }) {
   return (
@@ -29,22 +36,127 @@ function ProfileCard({
   person: Person
   className?: string
 }) {
+  const likeLock = useRef(false)
+  
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [liked, setLiked] = useState(false)
+  const [tapHearts, setTapHearts] = useState<
+    {
+      id: number
+      x: number
+      y: number
+      rotate: number
+    }[]
+  >([])
+
+  const lastTap = useRef(0)
+
+  const like = ({
+    clientX,
+    clientY,
+    currentTarget,
+  }: {
+    clientX: number
+    clientY: number
+    currentTarget: HTMLElement
+  }) => {
+    if (likeLock.current) return
+
+    likeLock.current = true
+
+    setTimeout(() => {
+      likeLock.current = false
+    }, 300)
+
+    setLiked(true)
+
+    const rect = currentTarget.getBoundingClientRect()
+
+    const id = Date.now()
+
+    const heart = {
+      id,
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+      rotate: Math.floor(Math.random() * 25) - 12,
+    }
+
+    
+
+    setTapHearts((prev) => [...prev, heart])
+
+    setTimeout(() => {
+      setTapHearts((prev) =>
+        prev.filter((h) => h.id !== id)
+      )
+    }, 650)
+  }
+
+  const dislike = () => {
+    setLiked(false)
+  }
+
+  const handleDoubleTap = (e: React.MouseEvent<HTMLElement>) => {
+    like({
+      clientX: e.clientX,
+      clientY: e.clientY,
+      currentTarget: e.currentTarget,
+    })
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLElement>) => {
+    console.log('TOUCH END', Date.now())
+    const now = Date.now()
+
+    if (now - lastTap.current < 300) {
+      const touch = e.changedTouches[0]
+
+      like({
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        currentTarget: e.currentTarget,
+      })
+
+      lastTap.current = 0
+      return
+    }
+
+    lastTap.current = now
+  }
 
   return (
     <article
       className={cn(
-        'overflow-hidden border-border bg-card shadow-xl',
+        'overflow-hidden border-border bg-card shadow-xl select-none touch-manipulation',
         className,
       )}
     >
 
-      <div className="relative h-full">
+      <div 
+        className="relative h-full"
+        onDoubleClick={handleDoubleTap}
+        onTouchEnd={handleTouchEnd}
+      >
         <img
           src={person.photo || '/placeholder.svg'}
           alt={person.name}
           className="size-full object-cover"
         />
+
+        {tapHearts.map((heart) => (
+          <span
+            key={heart.id}
+            className="pointer-events-none absolute z-30 text-7xl"
+            style={{
+              left: heart.x,
+              top: heart.y,
+              transform: `translate(-50%, -50%) rotate(${heart.rotate}deg)`,
+              animation: 'tapHeartFade 650ms ease forwards',
+            }}
+          >
+            ❤️
+          </span>
+        ))}
         
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/10 to-transparent" >
 
@@ -69,7 +181,12 @@ function ProfileCard({
             <h2 className="text-2xl font-bold">
               {person.name}, {person.age}
             </h2>
-            {person.verified && <BadgeCheck className="size-5 text-background" />}
+            {person.verified && <BadgeCheck className="size-5 text-background" />} 
+            {liked && (
+              <span onClick={dislike} className="grid size-8 animate-in zoom-in-50 fade-in duration-150 place-items-center rounded-full bg-white/90 text-xl shadow-md select-none">
+                ❤️
+              </span>
+            )}
           </div>
           <p className="mt-1 flex items-center gap-1 text-sm text-background/80">
             <MapPin className="size-3.5" /> {person.location}
@@ -89,6 +206,23 @@ function ProfileCard({
       </div>
       
       <FiltersModal open={filtersOpen} onOpenChange={setFiltersOpen} />
+
+
+      <style jsx>{`
+        @keyframes tapHeartFade {
+          0% {
+            opacity: 0;
+          }
+
+          20% {
+            opacity: 1;
+          }
+
+          100% {
+            opacity: 0;
+          }
+        }
+      `}</style>
       
     </article>
   )
