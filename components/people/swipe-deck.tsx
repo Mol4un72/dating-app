@@ -1,10 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { FiltersModal } from '@/components/people/filters-modal'
 import { MapPin, BadgeCheck, SlidersHorizontal } from 'lucide-react'
 import { type Person } from '@/lib/data'
 import { cn } from '@/lib/utils'
+
+type TapHeart = {
+  id: number
+  x: number
+  y: number
+  rotate: number
+}
 
 export function SwipeDeck({ people }: { people: Person[] }) {
   return (
@@ -30,6 +37,51 @@ function ProfileCard({
   className?: string
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [liked, setLiked] = useState(false)
+  const [tapHearts, setTapHearts] = useState<TapHeart[]>([])
+
+  const timer = useRef<NodeJS.Timeout | null>(null)
+
+  const like = (e: React.MouseEvent<HTMLElement>) => {
+    setLiked(true)
+
+    const rect = e.currentTarget.getBoundingClientRect()
+
+    const id = Date.now()
+
+    const newHeart: TapHeart = {
+      id,
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      rotate: Math.floor(Math.random() * 25) - 12,
+    }
+
+    setTapHearts((prev) => [...prev, newHeart])
+
+    setTimeout(() => {
+      setTapHearts((prev) =>
+        prev.filter((heart) => heart.id !== id)
+      )
+    }, 650)
+  }
+
+  const dislike = () => {
+    setLiked(false)
+  }
+
+  const handleDoubleTap = (e: React.MouseEvent<HTMLElement>) => {
+    if (timer.current) {
+      clearTimeout(timer.current)
+      timer.current = null
+
+      like(e)
+      return
+    }
+
+    timer.current = setTimeout(() => {
+      timer.current = null
+    }, 300)
+  }
 
   return (
     <article
@@ -37,6 +89,7 @@ function ProfileCard({
         'overflow-hidden border-border bg-card shadow-xl',
         className,
       )}
+      onDoubleClick={handleDoubleTap}
     >
 
       <div className="relative h-full">
@@ -45,6 +98,21 @@ function ProfileCard({
           alt={person.name}
           className="size-full object-cover"
         />
+
+        {tapHearts.map((heart) => (
+          <span
+            key={heart.id}
+            className="pointer-events-none absolute z-20 text-7xl"
+            style={{
+              left: heart.x,
+              top: heart.y,
+              transform: `translate(-50%, -50%) rotate(${heart.rotate}deg)`,
+              animation: 'tapHeartFade 650ms ease forwards',
+            }}
+          >
+            ❤️
+          </span>
+        ))}
         
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/10 to-transparent" >
 
@@ -69,7 +137,12 @@ function ProfileCard({
             <h2 className="text-2xl font-bold">
               {person.name}, {person.age}
             </h2>
-            {person.verified && <BadgeCheck className="size-5 text-background" />}
+            {person.verified && <BadgeCheck className="size-5 text-background" />} 
+            {liked && (
+              <span onClick={dislike} className="grid size-8 animate-in zoom-in-50 fade-in duration-150 place-items-center rounded-full bg-white/90 text-xl shadow-md select-none">
+                ❤️
+              </span>
+            )}
           </div>
           <p className="mt-1 flex items-center gap-1 text-sm text-background/80">
             <MapPin className="size-3.5" /> {person.location}
@@ -89,6 +162,23 @@ function ProfileCard({
       </div>
       
       <FiltersModal open={filtersOpen} onOpenChange={setFiltersOpen} />
+
+
+      <style jsx>{`
+        @keyframes tapHeartFade {
+          0% {
+            opacity: 0;
+          }
+
+          20% {
+            opacity: 1;
+          }
+
+          100% {
+            opacity: 0;
+          }
+        }
+      `}</style>
       
     </article>
   )
