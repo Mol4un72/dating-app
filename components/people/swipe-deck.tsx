@@ -38,29 +38,44 @@ function ProfileCard({
 }) {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [liked, setLiked] = useState(false)
-  const [tapHearts, setTapHearts] = useState<TapHeart[]>([])
+  const [tapHearts, setTapHearts] = useState<
+    {
+      id: number
+      x: number
+      y: number
+      rotate: number
+    }[]
+  >([])
 
-  const timer = useRef<NodeJS.Timeout | null>(null)
+  const lastTap = useRef(0)
 
-  const like = (e: React.MouseEvent<HTMLElement>) => {
+  const like = ({
+    clientX,
+    clientY,
+    currentTarget,
+  }: {
+    clientX: number
+    clientY: number
+    currentTarget: HTMLElement
+  }) => {
     setLiked(true)
 
-    const rect = e.currentTarget.getBoundingClientRect()
+    const rect = currentTarget.getBoundingClientRect()
 
     const id = Date.now()
 
-    const newHeart: TapHeart = {
+    const heart = {
       id,
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: clientX - rect.left,
+      y: clientY - rect.top,
       rotate: Math.floor(Math.random() * 25) - 12,
     }
 
-    setTapHearts((prev) => [...prev, newHeart])
+    setTapHearts((prev) => [...prev, heart])
 
     setTimeout(() => {
       setTapHearts((prev) =>
-        prev.filter((heart) => heart.id !== id)
+        prev.filter((h) => h.id !== id)
       )
     }, 650)
   }
@@ -69,30 +84,49 @@ function ProfileCard({
     setLiked(false)
   }
 
-  const handleDoubleTap = (e: React.MouseEvent<HTMLElement>) => {
-    if (timer.current) {
-      clearTimeout(timer.current)
-      timer.current = null
+  const handleDoubleTap = (
+    e: React.MouseEvent<HTMLElement>
+  ) => {
+    like({
+      clientX: e.clientX,
+      clientY: e.clientY,
+      currentTarget: e.currentTarget,
+    })
+  }
 
-      like(e)
+  const handleTouchEnd = (e: React.TouchEvent<HTMLElement>) => {
+    const now = Date.now()
+
+    if (now - lastTap.current < 300) {
+      const touch = e.changedTouches[0]
+
+      like({
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        currentTarget: e.currentTarget,
+      })
+
+      lastTap.current = 0
       return
     }
 
-    timer.current = setTimeout(() => {
-      timer.current = null
-    }, 300)
+    lastTap.current = now
   }
 
   return (
     <article
       className={cn(
-        'overflow-hidden border-border bg-card shadow-xl',
+        'overflow-hidden border-border bg-card shadow-xl select-none touch-manipulation',
         className,
       )}
       onDoubleClick={handleDoubleTap}
     >
 
-      <div className="relative h-full">
+      <div 
+        className="relative h-full"
+        onDoubleClick={handleDoubleTap}
+        onTouchEnd={handleTouchEnd}
+      >
         <img
           src={person.photo || '/placeholder.svg'}
           alt={person.name}
@@ -102,7 +136,7 @@ function ProfileCard({
         {tapHearts.map((heart) => (
           <span
             key={heart.id}
-            className="pointer-events-none absolute z-20 text-7xl"
+            className="pointer-events-none absolute z-30 text-7xl"
             style={{
               left: heart.x,
               top: heart.y,
