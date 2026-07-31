@@ -36,6 +36,8 @@ function ProfileCard({
   person: Person
   className?: string
 }) {
+  const likeLock = useRef(false)
+  
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [liked, setLiked] = useState(false)
   const [tapHearts, setTapHearts] = useState<
@@ -58,6 +60,14 @@ function ProfileCard({
     clientY: number
     currentTarget: HTMLElement
   }) => {
+    if (likeLock.current) return
+
+    likeLock.current = true
+
+    setTimeout(() => {
+      likeLock.current = false
+    }, 300)
+
     setLiked(true)
 
     const rect = currentTarget.getBoundingClientRect()
@@ -70,6 +80,8 @@ function ProfileCard({
       y: clientY - rect.top,
       rotate: Math.floor(Math.random() * 25) - 12,
     }
+
+    
 
     setTapHearts((prev) => [...prev, heart])
 
@@ -84,9 +96,7 @@ function ProfileCard({
     setLiked(false)
   }
 
-  const handleDoubleTap = (
-    e: React.MouseEvent<HTMLElement>
-  ) => {
+  const handleDoubleTap = (e: React.MouseEvent<HTMLElement>) => {
     like({
       clientX: e.clientX,
       clientY: e.clientY,
@@ -95,6 +105,7 @@ function ProfileCard({
   }
 
   const handleTouchEnd = (e: React.TouchEvent<HTMLElement>) => {
+    console.log('TOUCH END', Date.now())
     const now = Date.now()
 
     if (now - lastTap.current < 300) {
