@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -21,7 +21,7 @@ export function ChatMessenger({ activeId }: { activeId?: string }) {
     : undefined
 
   return (
-    <div className="flex min-h-[calc(100svh-4rem)] w-full lg:min-h-svh">
+    <div className="flex h-[calc(100svh-4rem)] w-full lg:h-svh overflow-hidden">
       {/* Conversation list */}
       <div
         className={cn(
@@ -71,7 +71,7 @@ export function ChatMessenger({ activeId }: { activeId?: string }) {
       </div>
 
       {/* Conversation pane */}
-      <div className={cn('flex flex-1 flex-col', !activeId && 'hidden lg:flex')}>
+      <div className={cn('flex min-h-0 flex-1 flex-col', !activeId && 'hidden lg:flex')}>
         {active ? (
           <Conversation
             name={active.name}
@@ -106,6 +106,13 @@ function Conversation({
   const [items, setItems] = useState<Message[]>(seedMessages)
   const [draft, setDraft] = useState('')
 
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+    })
+  }, [items])
+
   function send() {
     const text = draft.trim()
     if (!text) return
@@ -117,7 +124,7 @@ function Conversation({
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full min-h-0 flex-col">
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/85 px-4 py-3 backdrop-blur-lg">
         <div className="flex items-center gap-3">
@@ -145,17 +152,18 @@ function Conversation({
       </header>
 
       {/* Messages */}
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto bg-secondary/30 p-4">
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto bg-secondary/30 p-4 pb-24 lg:pb-4">
         <p className="mx-auto rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">
           You matched with {name}
         </p>
         {items.map((m) => (
           <Bubble key={m.id} message={m} />
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Composer */}
-      <div className="flex items-center gap-2 border-t border-border bg-card p-3">
+      <div className="fixed bottom-16 left-0 right-0 z-20 flex items-center gap-2 border-t border-border bg-card p-3 lg:sticky lg:bottom-0">
         <button className="grid size-10 shrink-0 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary" aria-label="Add attachment">
           <Plus className="size-5" />
         </button>
