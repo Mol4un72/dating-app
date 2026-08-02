@@ -5,13 +5,16 @@ export function Tag({
   children,
   active,
   className,
+  onClick,
 }: {
   children: React.ReactNode
   active?: boolean
   className?: string
+  onClick?: () => void
 }) {
   return (
     <span
+      onClick={onClick}
       className={cn(
         'inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
         active
