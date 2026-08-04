@@ -1,13 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  MapPin,
-  Pencil,
-  Settings,
-  Ruler,
-  Users,
-} from 'lucide-react'
+import { MapPin, Pencil, Settings, Ruler, Users, } from 'lucide-react'
 import { AppTopBar } from '@/components/app-topbar'
 import { Avatar } from '@/components/avatar'
 import { Tag, VerifiedBadge } from '@/components/tag'
@@ -15,42 +9,126 @@ import { PillButton } from '@/components/pill-button'
 import { Modal } from '@/components/modal'
 import { Field, Input } from '@/components/field'
 import { currentUser, Interests } from '@/lib/data'
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+  type ModalType =
+  | 'edit'
+  | 'interests'
+  | 'preferences'
+  | 'photos'
+  | null
+
+  type ErrorType = {
+    interests: boolean
+    photos: boolean
+  }
 
 export default function ProfilePage() {
-  const [editOpen, setEditOpen] = useState(false)
-  const [interestsOpen, setInterOpen] = useState(false)
-  const [preferencesOpen, setPrefOpen] = useState(false)
-  const [photosOpen, setPhotosOpen] = useState(false)
 
-  const [name, setName] = useState(currentUser.name)
-  const [location, setLocation] = useState(currentUser.location)
-  const [bio, setBio] = useState(currentUser.bio)
+  const [openModal, setOpenModal] = useState<ModalType>(null)
 
-  const [interests, setInterests] = useState(currentUser.interests)
+  const [error, setError] = useState<ErrorType>({
+    interests: false,
+    photos: false,
+  })
 
-  const [preferences, setPreferences] = useState(currentUser.preferences)
-  const [ageRange, setAgeRange] = useState(currentUser.preferences.ageRange)
-  const [distance, setDistance] = useState(currentUser.preferences.distance)
-  const [photos, setPhotos] = useState([...currentUser.photos])
+  const [profile, setProfile] = useState(currentUser)
 
+  const [draft, setDraft] = useState(currentUser)
+
+  const schema = z.object({
+    name: z.string().min(2, 'Minimum 2 symbols'),
+
+    location: z.string().min(4, 'Minimum 4 symbols'),
+
+    bio: z
+      .string()
+      .min(20, 'Minimum 20 symbols')
+      .max(140, 'Maximum 140 symbols'),
+  })
+
+
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: profile.name,
+      location: profile.location,
+      bio: profile.bio,
+    },
+  })
+
+  const {
+    register,
+    handleSubmit,
+    formState:{errors}
+  }=form
+
+  const onSubmit = (data: z.infer<typeof schema>) => {
+    setProfile((prev) => ({
+      ...prev,
+      ...data,
+    }))
+  
+    setOpenModal(null)
+  }
 
   function toggleInterest(interest: string) {
-    setInterests((prev) =>
-      prev.includes(interest)
-        ? prev.filter((item) => item !== interest)
-        : [...prev, interest]
-    )
+    setDraft((prev) => {
+      const isSelected = prev.interests.includes(interest)
+
+      if (isSelected && prev.interests.length === 1) {
+        setError({
+          interests: true,
+          photos: false,
+        })
+
+        return prev
+      }
+
+      setError({
+        interests: false,
+        photos: false,
+      })
+
+      return {
+        ...prev,
+        interests: isSelected
+          ? prev.interests.filter((item) => item !== interest)
+          : [...prev.interests, interest],
+      }
+    })
   }
 
   function removePhoto(index: number) {
-    setPhotos((prev) => prev.filter((_, i) => i !== index))
+    setDraft((prev) => {
+      if (prev.photos.length === 1) {
+        setError((e) => ({
+          ...e,
+          photos: true,
+        }))
+
+        return prev
+      }
+
+      setError((e) => ({
+        ...e,
+        photos: false,
+      }))
+
+      return {
+        ...prev,
+        photos: prev.photos.filter((_, i) => i !== index),
+      }
+    })
   }
 
   function addPhoto() {
-    setPhotos((prev) => [
+    setDraft((prev) => ({
       ...prev,
-      '/placeholder.svg',
-    ])
+      photos: [...prev.photos, "/placeholder.svg"],
+    }))
   }
   
   return (
@@ -64,18 +142,18 @@ export default function ProfilePage() {
           {/* Left: identity + info */}
           <div className="flex flex-col gap-6">
             <section className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-sm">
-              <Avatar src={currentUser.photo} alt={currentUser.name} size="xl" ring />
+              <Avatar src={profile.photo} alt={profile.name} size="xl" ring />
               <div className="mt-4 flex items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                  {name}, {currentUser.age}
+                  {profile.name}, {profile.age}
                 </h1>
                 {currentUser.verified && <VerifiedBadge />}
               </div>
               <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="size-4" /> {location}
+                <MapPin className="size-4" /> {profile.location}
               </p>
               <div className="mt-5 flex w-full gap-2">
-                <PillButton block onClick={() => setEditOpen(true)}>
+                <PillButton block onClick={() => setOpenModal('edit')}>
                   <Pencil className="size-4" /> Edit profile
                 </PillButton>
                 <PillButton variant="outline" className="shrink-0" aria-label="Settings" href="profile/settings">
@@ -91,8 +169,8 @@ export default function ProfilePage() {
 
               <div className='mt-1 mb-5'>
                 <h2 className="text-sm font-semibold text-foreground">About me</h2>
-                <p className="mt-3 text-pretty leading-relaxed text-muted-foreground">
-                  {bio}
+                <p className="mt-3 break-all text-pretty leading-relaxed text-muted-foreground">
+                  {profile.bio}
                 </p>
               </div>
 
@@ -101,10 +179,15 @@ export default function ProfilePage() {
               <div className='my-5'>
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground">Interests</h2>
-                  <button onClick={() => setInterOpen(true)} className="text-sm font-medium text-primary hover:underline">Manage</button>
+                  <button 
+                    onClick={() => {
+                      setDraft(profile)
+                      setOpenModal('interests')}
+                    } 
+                    className="text-sm font-medium text-primary hover:underline">Manage</button>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {interests.map((interest) => (
+                  {profile.interests.map((interest) => (
                     <Tag key={interest} active>
                       {interest}
                     </Tag>
@@ -117,12 +200,17 @@ export default function ProfilePage() {
               <div className='my-5'>
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
-                  <button onClick={() => setPrefOpen(true)} className="text-sm font-medium text-primary hover:underline">Manage</button>
+                  <button 
+                    onClick={() => {
+                      setDraft(profile)
+                      setOpenModal("preferences")
+                    }}
+                    className="text-sm font-medium text-primary hover:underline">Manage</button>
                 </div>
                 <ul className="mt-4 flex flex-col gap-4">
-                  <PreferenceRow icon={Users} label="Interested in" value={preferences.interestedIn} />
-                  <PreferenceRow icon={Ruler} label="Age range" value={ageRange} />
-                  <PreferenceRow icon={MapPin} label="Distance" value={distance === '51' ? 'Any distance' : `${distance} km`} />
+                  <PreferenceRow icon={Users} label="Interested in" value={profile.preferences.interestedIn} />
+                  <PreferenceRow icon={Ruler} label="Age range" value={profile.preferences.ageRange} />
+                  <PreferenceRow icon={MapPin} label="Distance" value={profile.preferences.distance === '51' ? 'Any distance' : `${profile.preferences.distance} km`} />
                 </ul>
               </div>
 
@@ -131,10 +219,15 @@ export default function ProfilePage() {
               <div className='mt-5 mb-1'>
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground">Photos</h2>
-                  <button onClick={() => setPhotosOpen(true)} className="text-sm font-medium text-primary hover:underline">Manage</button>
+                  <button
+                    onClick={() => {
+                      setDraft(profile)
+                      setOpenModal("photos")
+                    }}
+                    className="text-sm font-medium text-primary hover:underline">Manage</button>
                 </div>
                 <div className="mt-4 grid grid-cols-3 gap-3">
-                  {currentUser.photos.map((photo, i) => (
+                  {profile.photos.map((photo, i) => (
                     <img
                       key={i}
                       src={photo || '/placeholder.svg'}
@@ -151,61 +244,120 @@ export default function ProfilePage() {
       </div>
 
       <Modal
-        open={editOpen}
-        onOpenChange={setEditOpen}
+        open={openModal === 'edit'}
+        onOpenChange={(open) => {
+          setOpenModal(open ? 'edit' : null)
+        }}
         title="Edit profile"
         description="Update how you appear to others."
       >
         <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            setEditOpen(false)
-          }}
+          onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4"
         >
           <Field label="Name" htmlFor="edit-name">
-            <Input onChange={(e) => setName(e.target.value)} id="edit-name" defaultValue={name} />
+            <Input
+              id="edit-name"
+              {...register("name")}
+            />
+              {errors.name?.message &&
+                <p className="mt-2 text-sm font-medium text-red-600">
+                  Minimum 2 symbols
+                </p>
+              }
           </Field>
           <Field label="Location" htmlFor="edit-location">
-            <Input onChange={(e) => setLocation(e.target.value)} id="edit-location" defaultValue={location} />
+            <Input
+              id="edit-location"
+              {...register("location")}
+            />
+            {errors.location?.message &&
+              <p className="mt-2 text-sm font-medium text-red-600">
+                Minimum 4 symbols
+              </p>
+            }
           </Field>
           <Field label="About me" htmlFor="edit-bio">
             <textarea
-              id="edit-bio"
-              defaultValue={bio}
               rows={4}
+              maxLength={140}
               className="w-full rounded-xl border border-border bg-card p-4 text-[0.95rem] text-foreground shadow-sm outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/15 resize-none"
-              onChange={(e) => setBio(e.target.value)}
+              id="edit-bio"
+              {...register("bio")}
             />
+            {errors.bio?.message && (
+              <p className="mt-2 text-sm font-medium text-red-600">
+                Minimum 20 symbols
+              </p>
+            )}
           </Field>
-          <PillButton type="submit" block size="lg" className="mt-1">
+          <PillButton 
+            type="submit"
+            block size="lg"
+            className="mt-1"
+          >
             Save changes
           </PillButton>
         </form>
       </Modal>
 
       <Modal
-        open={interestsOpen}
-        onOpenChange={setInterOpen}
+        open={openModal === 'interests'}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDraft(profile)
+          }
+        
+          setOpenModal(open ? "interests" : null)
+        }}
         title="Interests"
-        description='Select the interests that describe you.'
+        description="Select the interests that describe you."
       >
         <div className="mt-3 flex flex-wrap gap-2">
           {Interests.map((interest) => (
-            <Tag 
+            <Tag
               key={interest}
-              active={interests.includes(interest)}
+              active={draft.interests.includes(interest)}
               onClick={() => toggleInterest(interest)}
             >
               {interest}
             </Tag>
           ))}
+
+          {error.interests && (
+            <div className="mt-3 w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+              Please keep at least one interest selected.
+            </div>
+          )}
         </div>
+        <PillButton 
+            type="submit"
+            block size="lg"
+            className="mt-5"
+            onClick={() => {
+              setProfile(draft)
+
+              setError((prev) => ({
+                ...prev,
+                interests: false
+              }))
+            
+              setOpenModal(null)
+            }}
+          >
+            Save changes
+          </PillButton>
       </Modal>
 
      <Modal
-        open={preferencesOpen}
-        onOpenChange={setPrefOpen}
+        open={openModal === 'preferences'}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDraft(profile)
+          }
+        
+          setOpenModal(open ? "preferences" : null)
+        }}
         title="Preferences"
         description="Choose what you're looking for."
       >
@@ -220,11 +372,14 @@ export default function ProfilePage() {
               {['Men', 'Women', 'Everyone'].map((item) => (
                 <Tag
                   key={item}
-                  active={preferences.interestedIn === item}
+                  active={draft.preferences.interestedIn === item}
                   onClick={() =>
-                    setPreferences((prev) => ({
+                    setDraft((prev) => ({
                       ...prev,
-                      interestedIn: item,
+                      preferences: {
+                        ...prev.preferences,
+                        interestedIn: item,
+                      },
                     }))
                   }
                 >
@@ -248,8 +403,16 @@ export default function ProfilePage() {
               ].map((item) => (
                 <Tag
                   key={item}
-                  active={ageRange === item}
-                  onClick={() => setAgeRange(item)}
+                  active={draft.preferences.ageRange === item}
+                  onClick={() =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      preferences: {
+                        ...prev.preferences,
+                        ageRange: item,
+                      },
+                    }))
+                  }
                 >
                   {item}
                 </Tag>
@@ -269,90 +432,112 @@ export default function ProfilePage() {
                 type="range"
                 min={'0'}
                 max={'51'}
-                value={distance}
-                onChange={(e) => setDistance(String(e.target.value))}
+                value={draft.preferences.distance}
+                onChange={(e) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    preferences: {
+                      ...prev.preferences,
+                      distance: String(e.target.value),
+                    },
+                  }))
+                }
                 className="w-full"
               />
 
               <div className="mt-3 text-center text-sm font-medium text-foreground">
-                {distance === '51' ? 'Any distance' : `${distance} km`}
+                {draft.preferences.distance === '51' ? 'Any distance' : `${draft.preferences.distance} km`}
               </div>
             </div>
           </div>
         </div>
+        <PillButton 
+            type="submit"
+            block size="lg"
+            className="mt-5"
+            onClick={() => {
+              setProfile(draft)
+              setOpenModal(null)
+            }}
+        >
+          Save changes
+        </PillButton>
       </Modal>
 
       <Modal
-        open={photosOpen}
-        onOpenChange={setPhotosOpen}
+        open={openModal === "photos"}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDraft(profile)
+            setError((prev) => ({
+              ...prev,
+              photos: false,
+            }))
+          }
+        
+          setOpenModal(open ? "photos" : null)
+        }}
         title="Photos"
         description="Manage your profile photos."
       >
-      <div className="flex flex-col gap-5">
-
-        <div className="grid grid-cols-3 gap-3">
-          {photos.map((photo, index) => (
-            <div
-              key={index}
-              className="group relative aspect-[3/4] overflow-hidden rounded-2xl"
-            >
-              <img
-                src={photo}
-                alt={`Photo ${index + 1}`}
-                className="h-full w-full object-cover"
-              />
-
-              <button
-                onClick={() => removePhoto(index)}
-                className="
-                  absolute right-2 top-2 
-                  grid size-7 place-items-center
-                  rounded-full 
-                  bg-black/50 
-                  text-white
-                  opacity-0
-                  transition-opacity
-                  group-hover:opacity-100
-                "
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-3 gap-3">
+            {draft.photos.map((photo, index) => (
+              <div
+                key={index}
+                className="group relative aspect-[3/4] overflow-hidden rounded-2xl"
               >
-                ×
-              </button>
-            </div>
-          ))}
+                <img
+                  src={photo}
+                  alt={`Photo ${index + 1}`}
+                  className="h-full w-full object-cover"
+                />
 
-          {photos.length < 3 && (
-            <button
-              onClick={addPhoto}
-              className="
-                aspect-[3/4]
-                rounded-2xl
-                border-2
-                border-dashed
-                border-border
-                text-2xl
-                text-muted-foreground
-                transition-colors
-                hover:border-primary
-                hover:text-primary
-              "
-            >
-              +
-            </button>
+                <button
+                  type="button"
+                  onClick={() => removePhoto(index)}
+                  className="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-black/50 text-white"
+                >
+                  <span className="-translate-y-0.5">×</span>
+                </button>
+              </div>
+            ))}
+
+            {draft.photos.length < 3 && (
+              <button
+                type="button"
+                onClick={addPhoto}
+                className="aspect-[3/4] rounded-2xl border-2 border-dashed border-border text-2xl text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              >
+                +
+              </button>
+            )}
+          </div>
+          
+          {error.photos && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+              Please keep at least one profile photo.
+            </div>
           )}
 
-        </div>
-
-        <PillButton
-          block
-          size="lg"
-          onClick={() => setPhotosOpen(false)}
-        >
-          Save photos
-        </PillButton>
-
+          <PillButton
+            block
+            size="lg"
+            onClick={() => {
+              setProfile(draft)
+                      
+              setError((prev) => ({
+                ...prev,
+                photos: false,
+              }))
+            
+              setOpenModal(null)
+            }}
+          >
+            Save photos
+          </PillButton>
         </div>
       </Modal>
-
     </>
   )
 }
