@@ -156,7 +156,7 @@ export default function ProfilePage() {
                 <PillButton block onClick={() => setOpenModal('edit')}>
                   <Pencil className="size-4" /> Edit profile
                 </PillButton>
-                <PillButton variant="outline" className="shrink-0" aria-label="Settings" href="profile/settings">
+                <PillButton variant="outline" className="shrink-0" aria-label="Settings" href="/profile/settings">
                   <Settings className="size-4" />
                 </PillButton>
               </div>
