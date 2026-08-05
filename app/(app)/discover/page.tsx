@@ -1,4 +1,4 @@
-import { Bell, Search } from 'lucide-react'
+import { Bell } from 'lucide-react'
 import { AppTopBar } from '@/components/app-topbar'
 import { SwipeDeck } from '@/components/people/swipe-deck'
 import { people } from '@/lib/data'
@@ -9,13 +9,6 @@ export default function DiscoverPage() {
       <AppTopBar
         actions={
           <>
-            <button
-              type="button"
-              aria-label="Search"
-              className="grid size-10 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary"
-            >
-              <Search className="size-5" />
-            </button>
             <button
               type="button"
               aria-label="Notifications"
