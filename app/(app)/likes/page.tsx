@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { AppTopBar } from '@/components/app-topbar'
 import { LikedCard } from '@/components/people/liked-card'
+import { NotificationsButton } from '@/components/notifications-button'
 import { people } from '@/lib/data'
 
 export default function LikesPage() {
@@ -16,7 +17,7 @@ export default function LikesPage() {
   
   return (
     <>
-      <AppTopBar title="Likes" />
+      <AppTopBar title="Likes" actions={<NotificationsButton />}/>
       <div className="mx-auto w-full max-w-4xl px-4 py-6 lg:py-10">
         <div className="mb-6 flex items-center justify-between">
           <div>

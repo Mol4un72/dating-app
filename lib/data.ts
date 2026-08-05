@@ -11,6 +11,20 @@ export type Person = {
   verified: boolean
 }
 
+export type NotificationType =
+  | 'like'
+  | 'match'
+  | 'message'
+
+export type Notification = {
+  id: number
+  type: NotificationType
+  title: string
+  description: string
+  time: string
+  unread: boolean
+}
+
 export const people: Person[] = [
   {
     id: 'sophie',
@@ -194,6 +208,32 @@ export const currentUser = {
     ageRange: '25 – 35',
     distance: '20',
   },
+  notifications: [
+    {
+      id: 1,
+      type: 'like',
+      title: 'Someone liked you',
+      description: 'Emma liked your profile',
+      time: '2 min ago',
+      unread: true,
+    },
+    {
+      id: 2,
+      type: 'match',
+      title: 'New match 🎉',
+      description: 'You matched with Olivia',
+      time: '1 hour ago',
+      unread: true,
+    },
+    {
+      id: 3,
+      type: 'message',
+      title: 'New message',
+      description: 'James sent you a message',
+      time: 'Yesterday',
+      unread: false,
+    },
+  ],
 }
 
 export const Interests = [
