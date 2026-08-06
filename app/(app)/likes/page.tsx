@@ -3,15 +3,25 @@
 import { useState } from 'react'
 import { AppTopBar } from '@/components/app-topbar'
 import { LikedCard } from '@/components/people/liked-card'
-import { people } from '@/lib/data'
+import { people, currentUser } from '@/lib/data'
 
 export default function LikesPage() {
-  const [likedPeople, setLikedPeople] = useState(people)
+  const [likedPeople, setLikedPeople] = useState(
+    people.filter((person) =>
+      currentUser.likedUsers.includes(person.id)
+    )
+  )
 
-  const handleDislike = (id: string) => {
+  const handleDislike = (id: number) => {
+
     setLikedPeople((prev) =>
       prev.filter((person) => person.id !== id)
     )
+
+    currentUser.likedUsers =
+      currentUser.likedUsers.filter(
+        (likedId) => likedId !== id
+      )
   }
   
   return (
