@@ -10,6 +10,7 @@ import { Field, Input, Select } from '@/components/field'
 import { cn } from '@/lib/utils'
 import { currentUser } from '@/lib/data'
 import { useRouter } from 'next/navigation'
+import { useFilters } from '@/context/filters-context'
 
 type TabType = 'notifications' | 'privacy' | 'preferences' | 'account'
 
@@ -74,6 +75,8 @@ export default function SettingsPage() {
   const [mounted, setMounted] = useState(false)
   const [selectedTab, setSelectedTab] = useState<TabType | null>(null)
   const [settings, setSettings] = useState<SettingsState>(defaultSettings)
+
+  const { filters, setFilters } = useFilters()
 
   // Modal states
   const [showLogoutModal, setShowLogoutModal] = useState(false)
@@ -317,6 +320,8 @@ export default function SettingsPage() {
               <TabPanel
                 tab={selectedTab}
                 settings={settings}
+                filters={filters}
+                setFilters={setFilters}
                 onToggle={handleToggle}
                 onValueChange={handleValueChange}
                 blockedUsers={settings.blockedUsers}
@@ -396,6 +401,8 @@ export default function SettingsPage() {
               <TabPanel
                 tab={selectedTab}
                 settings={settings}
+                filters={filters}
+                setFilters={setFilters}
                 onToggle={handleToggle}
                 onValueChange={handleValueChange}
                 blockedUsers={settings.blockedUsers}
@@ -524,6 +531,9 @@ function Switch({ checked, onChange }: { checked: boolean; onChange: (checked: b
 function TabPanel({
   tab,
   settings,
+  filters,
+  setFilters,
+  onBlockUser,
   onToggle,
   onValueChange,
   blockedUsers,
@@ -534,6 +544,8 @@ function TabPanel({
 }: {
   tab: TabType
   settings: SettingsState
+  filters: { interestedIn: string, ageRange: string, distance: string }
+  setFilters: React.Dispatch<React.SetStateAction<{ interestedIn: string, ageRange: string, distance: string }>>
   onToggle: (key: keyof SettingsState) => void
   onValueChange: (key: keyof SettingsState, value: string | number | boolean) => void
   blockedUsers: string[]
@@ -652,33 +664,46 @@ function TabPanel({
       return (
         <div className="flex flex-col gap-6 animate-in fade-in duration-300">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Dating preferences</h2>
+            <h2 className="text-xl font-bold text-foreground">
+              Dating preferences
+            </h2>
             <p className="text-sm text-muted-foreground mt-1">
               Specify your target matches&apos; profiles. Lumi will filter suggestions based on these settings.
             </p>
           </div>
-
+      
           <div className="flex flex-col gap-6">
-            {/* Interested In */}
+      
             <div>
-              <h3 className="text-sm font-semibold text-foreground">Interested in</h3>
+              <h3 className="text-sm font-semibold text-foreground">
+                Interested in
+              </h3>
+      
               <div className="mt-3 flex flex-wrap gap-2">
                 {['Men', 'Women', 'Everyone'].map((gender) => (
                   <Tag
                     key={gender}
-                    active={settings.interestedIn === gender}
+                    active={filters.interestedIn === gender}
                     className="cursor-pointer select-none"
-                    onClick={() => onValueChange('interestedIn', gender)}
+                    onClick={() =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        interestedIn: gender,
+                      }))
+                    }
                   >
                     {gender}
                   </Tag>
                 ))}
               </div>
             </div>
-
-            {/* Age range */}
+              
+              
             <div>
-              <h3 className="text-sm font-semibold text-foreground">Age range</h3>
+              <h3 className="text-sm font-semibold text-foreground">
+                Age range
+              </h3>
+              
               <div className="mt-3 flex flex-wrap gap-2">
                 {[
                   '18 – 25',
@@ -688,42 +713,50 @@ function TabPanel({
                 ].map((item) => (
                   <Tag
                     key={item}
-                    active={settings.ageRange === item}
+                    active={filters.ageRange === item}
                     className="cursor-pointer select-none"
-                    onClick={() => onValueChange('ageRange', item)}
+                    onClick={() =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        ageRange: item,
+                      }))
+                    }
                   >
                     {item}
                   </Tag>
                 ))}
               </div>
             </div>
-
-            {/* Distance */}
+              
+              
             <div>
-              <h3 className="text-sm font-semibold text-foreground">Distance</h3>
+              <h3 className="text-sm-semibold text-foreground">
+                Distance
+              </h3>
+              
               <div className="mt-2">
                 <input
                   type="range"
-                  min={'0'}
-                  max={'51'}
-                  value={settings.maxDistance}
-                  onChange={(e) => onValueChange('maxDistance', parseInt(e.target.value))}
+                  min="0"
+                  max="51"
+                  value={filters.distance}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      distance: e.target.value,
+                    }))
+                  }
                   className="w-full"
                 />
+
                 <div className="mt-3 text-center text-sm font-medium text-foreground">
-                  {settings.maxDistance === 51 ? 'Any distance' : `${settings.maxDistance} km`}
+                  {filters.distance === '51'
+                    ? 'Any distance'
+                    : `${filters.distance} km`}
                 </div>
               </div>
             </div>
-
-            {/* Verified users only toggle */}
-            <div className="flex items-center justify-between py-2 border-t border-border/60">
-              <div className="pr-4">
-                <h3 className="text-sm font-semibold text-foreground">Verified users only</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Only display profiles with a verification checkmark.</p>
-              </div>
-              <Switch checked={settings.verifiedOnly} onChange={() => onToggle('verifiedOnly')} />
-            </div>
+                  
           </div>
         </div>
       )
