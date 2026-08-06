@@ -20,7 +20,7 @@ export function ChatMessenger({ activeId }: { activeId?: string }) {
     : undefined
 
   return (
-    <div className="flex h-[calc(100svh-4rem)] w-full lg:h-svh overflow-hidden">
+    <div className="flex h-[calc(100svh-var(--nav-h,4rem))] w-full lg:h-svh overflow-hidden">
       {/* Conversation list */}
       <div
         className={cn(
@@ -110,7 +110,7 @@ function Conversation({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
-      behavior: 'smooth',
+      behavior: 'auto',
       block: 'nearest',
     })
   }, [items])
@@ -118,7 +118,7 @@ function Conversation({
   function send() {
     const text = draft.trim()
     if (!text) return
-    
+
     setItems((prev) => [
       ...prev,
       {
@@ -128,13 +128,8 @@ function Conversation({
         time: 'Now',
       },
     ])
-  
+
     setDraft('')
-  
-    // повертаємо фокус після ререндеру
-    requestAnimationFrame(() => {
-      inputRef.current?.focus()
-    })
   }
 
   return (
@@ -155,15 +150,16 @@ function Conversation({
             <p className="text-xs text-muted-foreground">{online ? 'Active now' : 'Offline'}</p>
           </div>
         </div>
-        <button>
-          <EllipsisVertical 
-            className='size-6'
-          />
+        <button
+          aria-label="Conversation options"
+          className="grid size-10 shrink-0 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary"
+        >
+          <EllipsisVertical className="size-5" />
         </button>
       </header>
 
       {/* Messages */}
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto bg-secondary/30 p-4 pb-24 lg:pb-4">
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto overscroll-contain bg-secondary/30 p-4">
         <p className="mx-auto rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">
           You matched with {name}
         </p>
@@ -178,9 +174,11 @@ function Conversation({
         <button className="grid size-10 shrink-0 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary" aria-label="Add attachment">
           <Plus className="size-5" />
         </button>
-        <div className="flex flex-1 items-center rounded-full bg-secondary pr-2">
+        <div className="flex min-w-0 flex-1 items-center rounded-full bg-secondary pr-2">
           <input
+            inputMode="text"
             enterKeyHint="send"
+            autoComplete="off"
             value={draft}
             ref={inputRef}
             onChange={(e) => setDraft(e.target.value)}
@@ -191,14 +189,17 @@ function Conversation({
               }
             }}
             placeholder="Type a message"
-            className="h-11 flex-1 bg-transparent px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            className="h-11 w-full min-w-0 flex-1 bg-transparent px-4 text-base text-foreground outline-none placeholder:text-muted-foreground md:text-sm"
           />
           <button className="grid size-8 place-items-center rounded-full text-muted-foreground hover:text-foreground" aria-label="Emoji">
             <Smile className="size-5" />
           </button>
         </div>
         <button
-          onClick={send}
+          onMouseDown={(e) => {
+            e.preventDefault()
+            send()
+          }}
           aria-label="Send message"
           className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform active:scale-90"
         >
@@ -215,7 +216,7 @@ function Bubble({ message }: { message: Message }) {
     <div className={cn('flex flex-col', fromMe ? 'items-end' : 'items-start')}>
       <div
         className={cn(
-          'relative max-w-[78%] overflow-hidden shadow-sm',
+          'relative max-w-[78%] shadow-sm',
           image ? 'rounded-2xl' : 'rounded-2xl px-4 py-2.5',
           fromMe
             ? 'bg-primary text-primary-foreground'
@@ -223,10 +224,16 @@ function Bubble({ message }: { message: Message }) {
         )}
       >
         {image && (
-          <img src={image || '/placeholder.svg'} alt="Shared" className="h-44 w-56 object-cover" />
+          <img
+            src={image || '/placeholder.svg'}
+            alt="Shared"
+            className="h-44 w-full max-w-56 rounded-2xl object-cover"
+          />
         )}
         {text && (
-          <p className={cn('text-sm leading-relaxed', image && 'px-4 py-2.5')}>{text}</p>
+          <p className={cn('break-words text-sm leading-relaxed', image && 'px-4 py-2.5')}>
+            {text}
+          </p>
         )}
         {reaction && (
           <span className="absolute -bottom-2 right-2 rounded-full border border-border bg-card px-1 text-xs shadow-sm">
