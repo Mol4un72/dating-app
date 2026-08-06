@@ -110,7 +110,7 @@ function Conversation({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
-      behavior: 'smooth',
+      behavior: 'auto',
       block: 'nearest',
     })
   }, [items])
@@ -118,7 +118,7 @@ function Conversation({
   function send() {
     const text = draft.trim()
     if (!text) return
-    
+
     setItems((prev) => [
       ...prev,
       {
@@ -128,13 +128,8 @@ function Conversation({
         time: 'Now',
       },
     ])
-  
+
     setDraft('')
-  
-    // повертаємо фокус після ререндеру
-    requestAnimationFrame(() => {
-      inputRef.current?.focus()
-    })
   }
 
   return (
@@ -180,7 +175,9 @@ function Conversation({
         </button>
         <div className="flex flex-1 items-center rounded-full bg-secondary pr-2">
           <input
+            inputMode="text"
             enterKeyHint="send"
+            autoComplete="off"
             value={draft}
             ref={inputRef}
             onChange={(e) => setDraft(e.target.value)}
@@ -198,7 +195,10 @@ function Conversation({
           </button>
         </div>
         <button
-          onClick={send}
+          onMouseDown={(e) => {
+            e.preventDefault()
+            send()
+          }}
           aria-label="Send message"
           className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform active:scale-90"
         >
