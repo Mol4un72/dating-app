@@ -209,6 +209,32 @@ export const currentUser = {
     distance: '20',
   },
   likedUsers: [] as number[],
+  notifications: [
+    {
+      id: 1,
+      type: 'like',
+      title: 'Someone liked you',
+      description: 'Emma liked your profile',
+      time: '2 min ago',
+      unread: true,
+    },
+    {
+      id: 2,
+      type: 'match',
+      title: 'New match 🎉',
+      description: 'You matched with Olivia',
+      time: '1 hour ago',
+      unread: true,
+    },
+    {
+      id: 3,
+      type: 'message',
+      title: 'New message',
+      description: 'James sent you a message',
+      time: 'Yesterday',
+      unread: false,
+    },
+  ] as Notification[],
 }
 
 export const Interests = [
