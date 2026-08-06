@@ -7,6 +7,7 @@ import { Logo } from '@/components/logo'
 import { Avatar } from '@/components/avatar'
 import { currentUser } from '@/lib/data'
 import { cn } from '@/lib/utils'
+import { useEffect, useState } from 'react'
 
 const nav = [
   { href: '/discover', label: 'Discover', icon: Compass },
@@ -18,6 +19,21 @@ const nav = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
+
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => {
+      const heightDiff = window.innerHeight - window.visualViewport!.height
+      setKeyboardOpen(heightDiff > 150)
+    }
+
+    window.visualViewport?.addEventListener('resize', handleResize)
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   return (
     <div className="mx-auto flex min-h-svh w-full bg-background">
@@ -63,7 +79,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-16 lg:pb-0">{children}</main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 h-16 border-t border-border bg-card/90 backdrop-blur-lg lg:hidden">
+      <nav
+        className={cn(
+          'fixed inset-x-0 bottom-0 z-40 h-16 border-t border-border bg-card/90 backdrop-blur-lg lg:hidden transition-transform',
+          keyboardOpen && 'translate-y-full',
+        )}
+      >
         <div className="mx-auto flex h-full max-w-md items-center justify-around px-2 py-2">
           {nav.map((item) => {
             const Icon = item.icon
