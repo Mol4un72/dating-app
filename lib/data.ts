@@ -1,5 +1,5 @@
 export type Person = {
-  id: string
+  id: number
   name: string
   age: number
   location: string
@@ -27,7 +27,7 @@ export type Notification = {
 
 export const people: Person[] = [
   {
-    id: 'sophie',
+    id: 0,
     name: 'Sophie',
     age: 26,
     location: 'Brooklyn, NY',
@@ -39,7 +39,7 @@ export const people: Person[] = [
     verified: true,
   },
   {
-    id: 'james',
+    id: 1,
     name: 'James',
     age: 31,
     location: 'Manhattan, NY',
@@ -51,7 +51,7 @@ export const people: Person[] = [
     verified: true,
   },
   {
-    id: 'mia',
+    id: 2,
     name: 'Mia',
     age: 24,
     location: 'Queens, NY',
@@ -63,7 +63,7 @@ export const people: Person[] = [
     verified: false,
   },
   {
-    id: 'liam',
+    id: 3,
     name: 'Liam',
     age: 29,
     location: 'Jersey City, NJ',
@@ -75,7 +75,7 @@ export const people: Person[] = [
     verified: true,
   },
   {
-    id: 'ava',
+    id: 4,
     name: 'Ava',
     age: 28,
     location: 'Hoboken, NJ',
@@ -87,7 +87,7 @@ export const people: Person[] = [
     verified: true,
   },
   {
-    id: 'noah',
+    id: 5,
     name: 'Noah',
     age: 27,
     location: 'Brooklyn, NY',
@@ -208,32 +208,7 @@ export const currentUser = {
     ageRange: '25 – 35',
     distance: '20',
   },
-  notifications: [
-    {
-      id: 1,
-      type: 'like',
-      title: 'Someone liked you',
-      description: 'Emma liked your profile',
-      time: '2 min ago',
-      unread: true,
-    },
-    {
-      id: 2,
-      type: 'match',
-      title: 'New match 🎉',
-      description: 'You matched with Olivia',
-      time: '1 hour ago',
-      unread: true,
-    },
-    {
-      id: 3,
-      type: 'message',
-      title: 'New message',
-      description: 'James sent you a message',
-      time: 'Yesterday',
-      unread: false,
-    },
-  ],
+  likedUsers: [] as number[],
 }
 
 export const Interests = [
