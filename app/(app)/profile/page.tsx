@@ -12,6 +12,8 @@ import { currentUser, Interests } from '@/lib/data'
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useFilters } from '@/context/filters-context'
+import { filter } from 'framer-motion/client'
 
   type ModalType =
   | 'edit'
@@ -26,6 +28,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
   }
 
 export default function ProfilePage() {
+
+  const { filters, setFilters } = useFilters()
 
   const [openModal, setOpenModal] = useState<ModalType>(null)
 
@@ -208,9 +212,9 @@ export default function ProfilePage() {
                     className="text-sm font-medium text-primary hover:underline">Manage</button>
                 </div>
                 <ul className="mt-4 flex flex-col gap-4">
-                  <PreferenceRow icon={Users} label="Interested in" value={profile.preferences.interestedIn} />
-                  <PreferenceRow icon={Ruler} label="Age range" value={profile.preferences.ageRange} />
-                  <PreferenceRow icon={MapPin} label="Distance" value={profile.preferences.distance === '51' ? 'Any distance' : `${profile.preferences.distance} km`} />
+                  <PreferenceRow icon={Users} label="Interested in" value={filters.interestedIn} />
+                  <PreferenceRow icon={Ruler} label="Age range" value={filters.ageRange} />
+                  <PreferenceRow icon={MapPin} label="Distance" value={filters.distance === '51' ? 'Any distance' : `${filters.distance} km`} />
                 </ul>
               </div>
 
@@ -349,37 +353,30 @@ export default function ProfilePage() {
           </PillButton>
       </Modal>
 
-     <Modal
+      <Modal
         open={openModal === 'preferences'}
         onOpenChange={(open) => {
-          if (!open) {
-            setDraft(profile)
-          }
-        
           setOpenModal(open ? "preferences" : null)
         }}
         title="Preferences"
         description="Choose what you're looking for."
       >
         <div className="flex flex-col gap-6">
-
+      
           <div>
             <h3 className="text-sm font-semibold text-foreground">
               Interested in
             </h3>
-
+      
             <div className="mt-3 flex flex-wrap gap-2">
               {['Men', 'Women', 'Everyone'].map((item) => (
                 <Tag
                   key={item}
-                  active={draft.preferences.interestedIn === item}
+                  active={filters.interestedIn === item}
                   onClick={() =>
-                    setDraft((prev) => ({
+                    setFilters((prev) => ({
                       ...prev,
-                      preferences: {
-                        ...prev.preferences,
-                        interestedIn: item,
-                      },
+                      interestedIn: item,
                     }))
                   }
                 >
@@ -388,12 +385,12 @@ export default function ProfilePage() {
               ))}
             </div>
           </div>
-
+            
           <div>
             <h3 className="text-sm font-semibold text-foreground">
               Age range
             </h3>
-
+            
             <div className="mt-3 flex flex-wrap gap-2">
               {[
                 '18 – 25',
@@ -403,14 +400,11 @@ export default function ProfilePage() {
               ].map((item) => (
                 <Tag
                   key={item}
-                  active={draft.preferences.ageRange === item}
+                  active={filters.ageRange === item}
                   onClick={() =>
-                    setDraft((prev) => ({
+                    setFilters((prev) => ({
                       ...prev,
-                      preferences: {
-                        ...prev.preferences,
-                        ageRange: item,
-                      },
+                      ageRange: item,
                     }))
                   }
                 >
@@ -420,45 +414,43 @@ export default function ProfilePage() {
             </div>
           </div>
             
-            
-          {/* Distance */}
           <div>
             <h3 className="text-sm font-semibold text-foreground">
               Distance
             </h3>
-
+            
             <div className="mt-2">
               <input
                 type="range"
-                min={'0'}
-                max={'51'}
-                value={draft.preferences.distance}
+                min="0"
+                max="51"
+                value={filters.distance}
                 onChange={(e) =>
-                  setDraft((prev) => ({
+                  setFilters((prev) => ({
                     ...prev,
-                    preferences: {
-                      ...prev.preferences,
-                      distance: String(e.target.value),
-                    },
+                    distance: e.target.value,
                   }))
                 }
                 className="w-full"
               />
 
               <div className="mt-3 text-center text-sm font-medium text-foreground">
-                {draft.preferences.distance === '51' ? 'Any distance' : `${draft.preferences.distance} km`}
+                {filters.distance === '51'
+                  ? 'Any distance'
+                  : `${filters.distance} km`}
               </div>
             </div>
           </div>
+                
         </div>
-        <PillButton 
-            type="submit"
-            block size="lg"
-            className="mt-5"
-            onClick={() => {
-              setProfile(draft)
-              setOpenModal(null)
-            }}
+                
+        <PillButton
+          block
+          size="lg"
+          className="mt-5"
+          onClick={() => {
+            setOpenModal(null)
+          }}
         >
           Save changes
         </PillButton>
