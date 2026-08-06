@@ -12,10 +12,7 @@ export function FiltersModal({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
-
-  const [interestedIn, setInterestedIn] = useState('Everyone')
-  const [ageRange, setAgeRange] = useState('25 – 35')
-  const [distance, setDistance] = useState('20')
+  const { filters, setFilters } = useFilters()
 
   return (
     <Modal
@@ -24,7 +21,6 @@ export function FiltersModal({
       title="Filters"
       description="Refine who you see."
     >
-
       <div className="flex flex-col gap-6">
 
         {/* Interested in */}
@@ -41,14 +37,20 @@ export function FiltersModal({
             ].map((item) => (
               <Tag
                 key={item}
-                active={interestedIn === item}
-                onClick={() => setInterestedIn(item)}
+                active={filters.interestedIn === item}
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    interestedIn: item,
+                  }))
+                }
               >
                 {item}
               </Tag>
             ))}
           </div>
         </div>
+
 
         {/* Age range */}
         <div>
@@ -65,14 +67,20 @@ export function FiltersModal({
             ].map((item) => (
               <Tag
                 key={item}
-                active={ageRange === item}
-                onClick={() => setAgeRange(item)}
+                active={filters.ageRange === item}
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    ageRange: item,
+                  }))
+                }
               >
                 {item}
               </Tag>
             ))}
           </div>
         </div>
+
 
         {/* Distance */}
         <div>
@@ -81,28 +89,28 @@ export function FiltersModal({
           </h3>
 
           <div className="mt-3">
-
             <input
               type="range"
               min="0"
               max="51"
-              value={distance}
+              value={filters.distance}
               onChange={(e) =>
-                setDistance(e.target.value)
+                setFilters((prev) => ({
+                  ...prev,
+                  distance: e.target.value,
+                }))
               }
               className="w-full"
             />
 
             <div className="mt-3 text-center text-sm font-medium text-foreground">
-              {
-                distance === '51'
-                  ? 'Any distance'
-                  : `${distance} km`
-              }
+              {filters.distance === '51'
+                ? 'Any distance'
+                : `${filters.distance} km`}
             </div>
-
           </div>
         </div>
+
 
         <PillButton
           block
