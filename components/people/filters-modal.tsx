@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useFilters } from '@/context/filters-context'
 import { Modal } from '@/components/modal'
 import { Tag } from '@/components/tag'
 import { PillButton } from '@/components/pill-button'
