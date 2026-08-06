@@ -4,12 +4,11 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
-  Phone,
-  Video,
   Plus,
   Send,
   Smile,
   MessageCircle,
+  EllipsisVertical,
 } from 'lucide-react'
 import { Avatar } from '@/components/avatar'
 import { conversations, messages as seedMessages, type Message } from '@/lib/data'
@@ -107,20 +106,35 @@ function Conversation({
   const [draft, setDraft] = useState('')
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth',
+      block: 'nearest',
     })
   }, [items])
 
   function send() {
     const text = draft.trim()
     if (!text) return
+    
     setItems((prev) => [
       ...prev,
-      { id: `local-${prev.length}`, fromMe: true, text, time: 'Now' },
+      {
+        id: `local-${prev.length}`,
+        fromMe: true,
+        text,
+        time: 'Now',
+      },
     ])
+  
     setDraft('')
+  
+    // повертаємо фокус після ререндеру
+    requestAnimationFrame(() => {
+      inputRef.current?.focus()
+    })
   }
 
   return (
@@ -141,14 +155,11 @@ function Conversation({
             <p className="text-xs text-muted-foreground">{online ? 'Active now' : 'Offline'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button className="grid size-9 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary" aria-label="Call">
-            <Phone className="size-5" />
-          </button>
-          <button className="grid size-9 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary" aria-label="Video call">
-            <Video className="size-5" />
-          </button>
-        </div>
+        <button>
+          <EllipsisVertical 
+            className='size-6'
+          />
+        </button>
       </header>
 
       {/* Messages */}
@@ -163,13 +174,15 @@ function Conversation({
       </div>
 
       {/* Composer */}
-      <div className="fixed bottom-16 left-0 right-0 z-20 flex items-center gap-2 border-t border-border bg-card p-3 lg:sticky lg:bottom-0">
+      <div className="sticky bottom-0 z-20 flex items-center gap-2 border-t border-border bg-card p-3">
         <button className="grid size-10 shrink-0 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary" aria-label="Add attachment">
           <Plus className="size-5" />
         </button>
         <div className="flex flex-1 items-center rounded-full bg-secondary pr-2">
           <input
+            enterKeyHint="send"
             value={draft}
+            ref={inputRef}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.nativeEvent.isComposing && e.keyCode !== 229) {
