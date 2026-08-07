@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef} from 'react'
 import { MapPin, Pencil, Settings, Ruler, Users, } from 'lucide-react'
 import { AppTopBar } from '@/components/app-topbar'
 import { Avatar } from '@/components/avatar'
@@ -13,7 +13,6 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useFilters } from '@/context/filters-context'
-import { filter } from 'framer-motion/client'
 
   type ModalType =
   | 'edit'
@@ -41,6 +40,8 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState(currentUser)
 
   const [draft, setDraft] = useState(currentUser)
+
+  const photoInputRef = useRef<HTMLInputElement | null>(null)
 
   const schema = z.object({
     name: z.string().min(2, 'Minimum 2 symbols'),
@@ -128,11 +129,42 @@ export default function ProfilePage() {
     })
   }
 
-  function addPhoto() {
+  function addPhoto(file: File) {
+    if (!file.type.startsWith("image/")) return
+
+    const url = URL.createObjectURL(file)
+
     setDraft((prev) => ({
       ...prev,
-      photos: [...prev.photos, "/placeholder.svg"],
+      photos: [...prev.photos, url],
     }))
+  }
+
+  function handlePhotoUpload(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const file = e.target.files?.[0]
+
+    if (!file) return
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image")
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Max size 5MB")
+      return
+    }
+
+    if (draft.photos.length >= 3) {
+      alert("Maximum 3 photos")
+      return
+    }
+
+    addPhoto(file)
+
+    e.target.value = ""
   }
   
   return (
@@ -473,6 +505,13 @@ export default function ProfilePage() {
         description="Manage your profile photos."
       >
         <div className="flex flex-col gap-5">
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handlePhotoUpload}
+          />
           <div className="grid grid-cols-3 gap-3">
             {draft.photos.map((photo, index) => (
               <div
@@ -498,7 +537,7 @@ export default function ProfilePage() {
             {draft.photos.length < 3 && (
               <button
                 type="button"
-                onClick={addPhoto}
+                onClick={() => photoInputRef.current?.click()}
                 className="aspect-[3/4] rounded-2xl border-2 border-dashed border-border text-2xl text-muted-foreground transition-colors hover:border-primary hover:text-primary"
               >
                 +
