@@ -280,7 +280,7 @@ function Conversation({
           />
           <button
             type="button"
-            onMouseDown={(e) => {
+            onPointerDown={(e) => {
               e.preventDefault()
               setShowEmoji((v) => !v)
             }}
