@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
-  Plus,
   Send,
+  ImagePlus,
   Smile,
   MessageCircle,
   EllipsisVertical,
@@ -13,6 +13,7 @@ import {
 import { Avatar } from '@/components/avatar'
 import { conversations, messages as seedMessages, type Message } from '@/lib/data'
 import { cn } from '@/lib/utils'
+import EmojiPicker from 'emoji-picker-react'
 
 export function ChatMessenger({ activeId }: { activeId?: string }) {
   const active = activeId
@@ -104,9 +105,13 @@ function Conversation({
 }) {
   const [items, setItems] = useState<Message[]>(seedMessages)
   const [draft, setDraft] = useState('')
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [showEmoji, setShowEmoji] = useState(false)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -117,19 +122,33 @@ function Conversation({
 
   function send() {
     const text = draft.trim()
-    if (!text) return
+
+    if (!text && !selectedImage) return
 
     setItems((prev) => [
       ...prev,
       {
         id: `local-${prev.length}`,
         fromMe: true,
-        text,
+        text: text || undefined,
+        image: selectedImage || undefined,
         time: 'Now',
       },
     ])
 
     setDraft('')
+    setSelectedImage(null)
+  }
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const image = URL.createObjectURL(file)
+
+    setSelectedImage(image)
+
+    e.target.value = ''
   }
 
   return (
@@ -169,11 +188,57 @@ function Conversation({
         <div ref={messagesEndRef} />
       </div>
 
+      {selectedImage && (
+        <div className="border-t border-border bg-card p-3">
+          <div className="relative w-24">
+            <img
+              src={selectedImage}
+              alt="Preview"
+              className="h-24 w-24 rounded-xl object-cover"
+            />
+
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute -right-2 -top-2 grid size-6 rounded-full bg-black text-white"
+            >
+              <span className="-translate-y-0.5">×</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Composer */}
-      <div className="sticky bottom-0 z-20 flex items-center gap-2 border-t border-border bg-card p-3">
-        <button className="grid size-10 shrink-0 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary" aria-label="Add attachment">
-          <Plus className="size-5" />
+      <div className="sticky bottom-0 z-20 flex items-center gap-2 border-t border-border bg-card p-3 relative">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageChange}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="grid size-10 shrink-0 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary"
+          aria-label="Add attachment"
+        >
+          <ImagePlus className="size-5" />
         </button>
+        {showEmoji && (
+          <div className="absolute bottom-16 right-14 z-50">
+            <EmojiPicker
+              onEmojiClick={(emoji) => {
+                setDraft((prev) => prev + emoji.emoji)
+              }}
+              height={350}
+              width={320}
+              searchDisabled={false}
+              previewConfig={{
+                showPreview: false,
+              }}
+            />
+          </div>
+        )}
         <div className="flex min-w-0 flex-1 items-center rounded-full bg-secondary pr-2">
           <input
             inputMode="text"
@@ -191,7 +256,12 @@ function Conversation({
             placeholder="Type a message"
             className="h-11 w-full min-w-0 flex-1 bg-transparent px-4 text-base text-foreground outline-none placeholder:text-muted-foreground md:text-sm"
           />
-          <button className="grid size-8 place-items-center rounded-full text-muted-foreground hover:text-foreground" aria-label="Emoji">
+          <button
+            type="button"
+            onClick={() => setShowEmoji((v) => !v)}
+            className="grid size-8 place-items-center rounded-full text-muted-foreground hover:text-foreground"
+            aria-label="Emoji"
+          >
             <Smile className="size-5" />
           </button>
         </div>
@@ -231,7 +301,12 @@ function Bubble({ message }: { message: Message }) {
           />
         )}
         {text && (
-          <p className={cn('break-words text-sm leading-relaxed', image && 'px-4 py-2.5')}>
+          <p
+            className={cn(
+              'break-words text-sm leading-relaxed max-w-[45ch]',
+              image && 'px-4 py-2.5'
+            )}
+          >
             {text}
           </p>
         )}
