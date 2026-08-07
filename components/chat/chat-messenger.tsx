@@ -89,6 +89,7 @@ export function ChatMessenger({ activeId }: { activeId?: string }) {
             name={active.name}
             photo={active.photo}
             online={active.online}
+            personId={active.personId}
           />
         ) : (
           <div className="hidden flex-1 flex-col items-center justify-center gap-3 p-8 text-center lg:flex">
@@ -110,10 +111,12 @@ function Conversation({
   name,
   photo,
   online,
+  personId,
 }: {
   name: string
   photo: string
   online: boolean
+  personId: number
 }) {
   const [items, setItems] = useState<Message[]>(seedMessages)
   const [draft, setDraft] = useState('')
@@ -193,26 +196,34 @@ function Conversation({
           >
             <ArrowLeft className="size-5" />
           </Link>
-          <Avatar src={photo} alt={name} size="sm" online={online} />
+          <Link href={`/profile/${personId}`}>
+            <Avatar src={photo} alt={name} size="sm" online={online} />
+          </Link>
           <div>
             <p className="font-semibold text-foreground">{name}</p>
             <p className="text-xs text-muted-foreground">{online ? 'Active now' : 'Offline'}</p>
           </div>
         </div>
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <button
-              aria-label="Conversation options"
-              className="grid size-10 place-items-center rounded-full hover:bg-secondary"
-            >
-              <EllipsisVertical className="size-6" />
-            </button>
+          <DropdownMenuTrigger
+            aria-label="Conversation options"
+            className="
+              grid
+              size-10
+              place-items-center
+              rounded-full
+              hover:bg-secondary
+            "
+          >
+            <EllipsisVertical className="size-5" />
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem>
-              <User className="mr-2 size-4" />
-              View profile
+              <Link href={`/profile/${personId}`}>
+                <User className="mr-2 size-4" />
+                View profile
+              </Link>
             </DropdownMenuItem>
 
             <DropdownMenuItem>
