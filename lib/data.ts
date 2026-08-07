@@ -11,6 +11,20 @@ export type Person = {
   verified: boolean
 }
 
+export type NotificationType =
+  | 'like'
+  | 'match'
+  | 'message'
+
+export type Notification = {
+  id: number
+  type: NotificationType
+  title: string
+  description: string
+  time: string
+  unread: boolean
+}
+
 export const people: Person[] = [
   {
     id: 0,
@@ -192,6 +206,65 @@ export const currentUser = {
   preferences: {
     interestedIn: 'Everyone',
     ageRange: '25 – 35',
-    distance: 'Within 20 km',
+    distance: '20',
   },
+  likedUsers: [] as number[],
+  notifications: [
+    {
+      id: 1,
+      type: 'like',
+      title: 'Someone liked you',
+      description: 'Emma liked your profile',
+      time: '2 min ago',
+      unread: true,
+    },
+    {
+      id: 2,
+      type: 'match',
+      title: 'New match 🎉',
+      description: 'You matched with Olivia',
+      time: '1 hour ago',
+      unread: true,
+    },
+    {
+      id: 3,
+      type: 'message',
+      title: 'New message',
+      description: 'James sent you a message',
+      time: 'Yesterday',
+      unread: false,
+    },
+  ] as Notification[],
 }
+
+export const Interests = [
+  'Art',
+  'Baking',
+  'Camping',
+  'Climbing',
+  'Coffee',
+  'Concerts',
+  'Cooking',
+  'Cycling',
+  'Design',
+  'Dogs',
+  'Film',
+  'Food',
+  'Hiking',
+  'Jazz',
+  'Museums',
+  'Music',
+  'Photography',
+  'Plants',
+  'Podcasts',
+  'Reading',
+  'Running',
+  'Skating',
+  'Tech',
+  'Travel',
+  'Vinyl',
+  'Wine',
+  'Yoga',
+  'Ceramics',
+  'Live music',
+]

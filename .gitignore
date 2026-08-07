@@ -47,4 +47,7 @@ next-env.d.ts
 .claude
 .windsurf
 AGENTS.md
-CLAUDE.md 
+CLAUDE.md
+
+# Task
+TASKS.md

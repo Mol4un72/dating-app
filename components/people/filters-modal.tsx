@@ -1,12 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useFilters } from '@/context/filters-context'
 import { Modal } from '@/components/modal'
-import { Field, Select } from '@/components/field'
 import { Tag } from '@/components/tag'
 import { PillButton } from '@/components/pill-button'
-
-const interests = ['Coffee', 'Hiking', 'Art', 'Music', 'Cooking', 'Travel', 'Reading', 'Fitness', 'Film']
 
 export function FiltersModal({
   open,
@@ -15,61 +12,114 @@ export function FiltersModal({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
-  const [active, setActive] = useState<string[]>(['Coffee', 'Travel'])
-
-  function toggle(tag: string) {
-    setActive((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
-    )
-  }
+  const { filters, setFilters } = useFilters()
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Filters" description="Refine who you see.">
-      <div className="flex flex-col gap-5">
-        <Field label="Interested in">
-          <Select defaultValue="Everyone">
-            <option>Women</option>
-            <option>Men</option>
-            <option>Everyone</option>
-          </Select>
-        </Field>
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Min age">
-            <Select defaultValue="25">
-              {Array.from({ length: 40 }, (_, i) => i + 18).map((a) => (
-                <option key={a}>{a}</option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Max age">
-            <Select defaultValue="35">
-              {Array.from({ length: 40 }, (_, i) => i + 18).map((a) => (
-                <option key={a}>{a}</option>
-              ))}
-            </Select>
-          </Field>
-        </div>
-        <Field label="Maximum distance">
-          <Select defaultValue="20 km">
-            <option>5 km</option>
-            <option>10 km</option>
-            <option>20 km</option>
-            <option>50 km</option>
-          </Select>
-        </Field>
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Filters"
+      description="Refine who you see."
+    >
+      <div className="flex flex-col gap-6">
+
+        {/* Interested in */}
         <div>
-          <p className="mb-2 text-sm font-medium text-foreground">Shared interests</p>
-          <div className="flex flex-wrap gap-2">
-            {interests.map((interest) => (
-              <button key={interest} type="button" onClick={() => toggle(interest)}>
-                <Tag active={active.includes(interest)}>{interest}</Tag>
-              </button>
+          <h3 className="text-sm font-semibold text-foreground">
+            Interested in
+          </h3>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[
+              'Men',
+              'Women',
+              'Everyone',
+            ].map((item) => (
+              <Tag
+                key={item}
+                active={filters.interestedIn === item}
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    interestedIn: item,
+                  }))
+                }
+              >
+                {item}
+              </Tag>
             ))}
           </div>
         </div>
-        <PillButton block size="lg" onClick={() => onOpenChange(false)}>
-          Show 240+ people
+
+
+        {/* Age range */}
+        <div>
+          <h3 className="text-sm font-semibold text-foreground">
+            Age range
+          </h3>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[
+              '18 – 25',
+              '25 – 35',
+              '35 – 45',
+              '45+',
+            ].map((item) => (
+              <Tag
+                key={item}
+                active={filters.ageRange === item}
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    ageRange: item,
+                  }))
+                }
+              >
+                {item}
+              </Tag>
+            ))}
+          </div>
+        </div>
+
+
+        {/* Distance */}
+        <div>
+          <h3 className="text-sm font-semibold text-foreground">
+            Distance
+          </h3>
+
+          <div className="mt-3">
+            <input
+              type="range"
+              min="0"
+              max="51"
+              value={filters.distance}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  distance: e.target.value,
+                }))
+              }
+              className="w-full"
+            />
+
+            <div className="mt-3 text-center text-sm font-medium text-foreground">
+              {filters.distance === '51'
+                ? 'Any distance'
+                : `${filters.distance} km`}
+            </div>
+          </div>
+        </div>
+
+
+        <PillButton
+          block
+          size="lg"
+          onClick={() => onOpenChange(false)}
+        >
+          Show people
         </PillButton>
+
       </div>
     </Modal>
   )
