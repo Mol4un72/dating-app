@@ -7,9 +7,21 @@ import {
   Send,
   ImagePlus,
   Smile,
+  User,
+  BellOff,
+  Bell,
+  ShieldAlert,
+  Ban,
   MessageCircle,
   EllipsisVertical,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Avatar } from '@/components/avatar'
 import { conversations, messages as seedMessages, type Message } from '@/lib/data'
 import { cn } from '@/lib/utils'
@@ -187,12 +199,40 @@ function Conversation({
             <p className="text-xs text-muted-foreground">{online ? 'Active now' : 'Offline'}</p>
           </div>
         </div>
-        <button
-          aria-label="Conversation options"
-          className="grid size-10 shrink-0 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary"
-        >
-          <EllipsisVertical className="size-5" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <button
+              aria-label="Conversation options"
+              className="grid size-10 place-items-center rounded-full hover:bg-secondary"
+            >
+              <EllipsisVertical className="size-6" />
+            </button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem>
+              <User className="mr-2 size-4" />
+              View profile
+            </DropdownMenuItem>
+
+            <DropdownMenuItem>
+              <BellOff className="mr-2 size-4" />
+              Mute notifications
+            </DropdownMenuItem>
+
+            <DropdownMenuItem>
+              <ShieldAlert className="mr-2 size-4" />
+              Report user
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem className="text-destructive focus:text-destructive">
+              <Ban className="mr-2 size-4" />
+              Block user
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
 
       {/* Messages */}
