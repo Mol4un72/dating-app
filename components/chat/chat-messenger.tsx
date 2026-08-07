@@ -280,7 +280,10 @@ function Conversation({
           />
           <button
             type="button"
-            onClick={() => setShowEmoji((v) => !v)}
+            onMouseDown={(e) => {
+              e.preventDefault()
+              setShowEmoji((v) => !v)
+            }}
             className="grid size-8 place-items-center rounded-full text-muted-foreground hover:text-foreground"
             aria-label="Emoji"
           >
