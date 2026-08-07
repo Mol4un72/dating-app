@@ -52,28 +52,24 @@ export function AppShell({
   const [keyboardOpen, setKeyboardOpen] = useState(false)
 
   useEffect(() => {
-    if (!window.visualViewport) return
+    const isTextField = (el: EventTarget | null) =>
+      el instanceof HTMLElement &&
+      (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')
 
-    const handleResize = () => {
-      const heightDiff =
-        window.innerHeight -
-        window.visualViewport!.height
-
-      setKeyboardOpen(heightDiff > 150)
+    const handleFocusIn = (e: FocusEvent) => {
+      if (isTextField(e.target)) setKeyboardOpen(true)
     }
 
-    handleResize()
+    const handleFocusOut = (e: FocusEvent) => {
+      if (isTextField(e.target)) setKeyboardOpen(false)
+    }
 
-    window.visualViewport.addEventListener(
-      'resize',
-      handleResize,
-    )
+    document.addEventListener('focusin', handleFocusIn)
+    document.addEventListener('focusout', handleFocusOut)
 
     return () => {
-      window.visualViewport?.removeEventListener(
-        'resize',
-        handleResize,
-      )
+      document.removeEventListener('focusin', handleFocusIn)
+      document.removeEventListener('focusout', handleFocusOut)
     }
   }, [])
 
