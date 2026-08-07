@@ -112,6 +112,7 @@ function Conversation({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [showEmoji, setShowEmoji] = useState(false)
+  const emojiRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -119,6 +120,23 @@ function Conversation({
       block: 'nearest',
     })
   }, [items])
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        emojiRef.current &&
+        !emojiRef.current.contains(event.target as Node)
+      ) {
+        setShowEmoji(false)
+      }
+    }
+  
+    document.addEventListener('mousedown', handleClickOutside)
+  
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   function send() {
     const text = draft.trim()
@@ -225,14 +243,18 @@ function Conversation({
           <ImagePlus className="size-5" />
         </button>
         {showEmoji && (
-          <div className="absolute bottom-16 right-14 z-50">
+          <div
+            ref={emojiRef}
+            className="absolute bottom-16 right-14 z-50"
+          >
             <EmojiPicker
               onEmojiClick={(emoji) => {
                 setDraft((prev) => prev + emoji.emoji)
               }}
               height={350}
               width={320}
-              searchDisabled={false}
+              searchDisabled={true}
+              skinTonesDisabled
               previewConfig={{
                 showPreview: false,
               }}
