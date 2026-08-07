@@ -78,7 +78,14 @@ export function AppShell({
   }, [])
 
   return (
-    <div className="mx-auto flex min-h-svh w-full bg-background">
+    <div
+      className="mx-auto flex min-h-svh w-full bg-background"
+      style={{
+        ['--nav-h' as string]: keyboardOpen
+          ? '0px'
+          : 'calc(4rem + env(safe-area-inset-bottom))',
+      }}
+    >
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col border-r border-border bg-sidebar px-4 py-6 lg:flex">
         <div className="px-2">
@@ -132,18 +139,19 @@ export function AppShell({
       </aside>
 
       {/* Main content */}
-      <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-16 lg:pb-0">
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col pb-[var(--nav-h,4rem)] transition-[padding] duration-200 lg:pb-0">
         {children}
       </main>
 
       {/* Mobile bottom nav */}
       <nav
         className={cn(
-          'fixed inset-x-0 bottom-0 z-40 h-16 border-t border-border bg-card/90 backdrop-blur-lg transition-transform duration-200 lg:hidden',
+          'fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/90 backdrop-blur-lg transition-transform duration-200 lg:hidden',
           keyboardOpen && 'translate-y-full',
         )}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="mx-auto flex h-full max-w-md items-center justify-around px-2 py-2">
+        <div className="mx-auto flex h-16 max-w-md items-center justify-around px-2 py-2">
           {nav.map((item) => {
             const Icon = item.icon
             const active = isActive(item.href)
