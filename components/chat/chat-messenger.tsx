@@ -9,7 +9,6 @@ import {
   Smile,
   User,
   BellOff,
-  Bell,
   ShieldAlert,
   Ban,
   MessageCircle,
@@ -215,16 +214,16 @@ function Conversation({
               hover:bg-secondary
             "
           >
-            <EllipsisVertical className="size-5" />
+            <EllipsisVertical className="size-6" />
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem>
-              <Link href={`/profile/${personId}`}>
+            <Link href={`/profile/${personId}`}>
+              <DropdownMenuItem>
                 <User className="mr-2 size-4" />
                 View profile
-              </Link>
-            </DropdownMenuItem>
+              </DropdownMenuItem>
+            </Link>
 
             <DropdownMenuItem>
               <BellOff className="mr-2 size-4" />
