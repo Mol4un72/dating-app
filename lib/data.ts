@@ -25,6 +25,40 @@ export type Notification = {
   unread: boolean
 }
 
+export interface SettingsState {
+  // Notifications
+  newMatches: boolean
+  newMessages: boolean
+  superLikes: boolean
+  appUpdates: boolean
+  emailAlerts: boolean
+
+  // Privacy
+  profileVisibility: 'everyone' | 'verified' | 'incognito'
+  showOnlineStatus: boolean
+  shareData: boolean
+  blockedUsers: string[]
+
+  // Preferences
+  interestedIn: string
+  ageRange: string
+  maxDistance: number
+  verifiedOnly: boolean
+
+  // Account
+  email: string
+  phone: string
+  language: string
+}
+
+export type TabType = 'notifications' | 'privacy' | 'preferences' | 'account'
+
+export interface PasswordState {
+  current: string
+  new: string
+  confirm: string
+}
+
 export const people: Person[] = [
   {
     id: 0,
@@ -203,11 +237,6 @@ export const currentUser = {
   bio: 'Designer, amateur ceramicist, and forever chasing golden hour. Looking for someone to explore the city (and its coffee shops) with.',
   interests: ['Ceramics', 'Coffee', 'Design', 'Travel', 'Live music', 'Cooking'],
   photos: ['/people/ava.png', '/people/sophie.png', '/people/mia.png'],
-  preferences: {
-    interestedIn: 'Everyone',
-    ageRange: '25 – 35',
-    distance: '20',
-  },
   likedUsers: [] as number[],
   notifications: [
     {
@@ -235,6 +264,27 @@ export const currentUser = {
       unread: false,
     },
   ] as Notification[],
+  Settings: {
+    newMatches: true,
+    newMessages: true,
+    superLikes: true,
+    appUpdates: false,
+    emailAlerts: true,
+
+    profileVisibility: 'everyone',
+    showOnlineStatus: true,
+    shareData: true,
+    blockedUsers: ['spammer.joe@example.com', 'ex.partner@example.com'],
+
+    interestedIn: 'Everyone',
+    ageRange: '25 – 35',
+    maxDistance: '20',
+    verifiedOnly: false,
+
+    email: 'elena.kovalenko@example.com',
+    phone: '+1 (555) 019-2834',
+    language: 'English'
+  }
 }
 
 export const Interests = [

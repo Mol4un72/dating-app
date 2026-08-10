@@ -1,4 +1,3 @@
-import { Bell } from 'lucide-react'
 import { AppTopBar } from '@/components/app-topbar'
 import { SwipeDeck } from '@/components/people/swipe-deck'
 import { NotificationsButton } from '@/components/notifications-button'
