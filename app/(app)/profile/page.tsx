@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef} from 'react'
+import { useState, useRef, useEffect} from 'react'
 import { MapPin, Pencil, Settings, Ruler, Users, } from 'lucide-react'
 import { AppTopBar } from '@/components/app-topbar'
 import { Avatar } from '@/components/avatar'
@@ -39,7 +39,10 @@ export default function ProfilePage() {
 
   const [profile, setProfile] = useState(currentUser)
 
-  const [draft, setDraft] = useState(currentUser)
+  const [draft, setDraft] = useState({
+    ...currentUser,
+    filters,
+  })
 
   const photoInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -51,7 +54,6 @@ export default function ProfilePage() {
     bio: z
       .string()
       .min(20, 'Minimum 20 symbols')
-      .max(140, 'Maximum 140 symbols'),
   })
 
 
@@ -67,6 +69,7 @@ export default function ProfilePage() {
   const {
     register,
     handleSubmit,
+    reset,
     formState:{errors}
   }=form
 
@@ -183,13 +186,22 @@ export default function ProfilePage() {
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
                   {profile.name}, {profile.age}
                 </h1>
-                {currentUser.verified && <VerifiedBadge />}
+                {profile.verified && <VerifiedBadge />}
               </div>
               <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                 <MapPin className="size-4" /> {profile.location}
               </p>
               <div className="mt-5 flex w-full gap-2">
-                <PillButton block onClick={() => setOpenModal('edit')}>
+                <PillButton 
+                  block 
+                  onClick={() => {
+                    reset({
+                      name: profile.name,
+                      location: profile.location,
+                      bio: profile.bio,
+                    })
+                    setOpenModal('edit')
+                  }}>
                   <Pencil className="size-4" /> Edit profile
                 </PillButton>
                 <PillButton variant="outline" className="shrink-0" aria-label="Settings" href="/profile/settings">
@@ -217,7 +229,10 @@ export default function ProfilePage() {
                   <h2 className="text-sm font-semibold text-foreground">Interests</h2>
                   <button 
                     onClick={() => {
-                      setDraft(profile)
+                      setDraft({
+                        ...profile,
+                        filters,
+                      })
                       setOpenModal('interests')}
                     } 
                     className="text-sm font-medium text-primary hover:underline">Manage</button>
@@ -238,8 +253,12 @@ export default function ProfilePage() {
                   <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
                   <button 
                     onClick={() => {
-                      setDraft(profile)
-                      setOpenModal("preferences")
+                      setDraft({
+                        ...profile,
+                        filters,
+                      })
+                    
+                      setOpenModal('preferences')
                     }}
                     className="text-sm font-medium text-primary hover:underline">Manage</button>
                 </div>
@@ -257,7 +276,10 @@ export default function ProfilePage() {
                   <h2 className="text-sm font-semibold text-foreground">Photos</h2>
                   <button
                     onClick={() => {
-                      setDraft(profile)
+                      setDraft({
+                        ...profile,
+                        filters,
+                      })
                       setOpenModal("photos")
                     }}
                     className="text-sm font-medium text-primary hover:underline">Manage</button>
@@ -298,7 +320,7 @@ export default function ProfilePage() {
             />
               {errors.name?.message &&
                 <p className="mt-2 text-sm font-medium text-red-600">
-                  Minimum 2 symbols
+                  {errors.name.message}
                 </p>
               }
           </Field>
@@ -309,7 +331,7 @@ export default function ProfilePage() {
             />
             {errors.location?.message &&
               <p className="mt-2 text-sm font-medium text-red-600">
-                Minimum 4 symbols
+                {errors.location.message}
               </p>
             }
           </Field>
@@ -323,7 +345,7 @@ export default function ProfilePage() {
             />
             {errors.bio?.message && (
               <p className="mt-2 text-sm font-medium text-red-600">
-                Minimum 20 symbols
+                {errors.bio.message}
               </p>
             )}
           </Field>
@@ -341,7 +363,10 @@ export default function ProfilePage() {
         open={openModal === 'interests'}
         onOpenChange={(open) => {
           if (!open) {
-            setDraft(profile)
+            setDraft({
+              ...profile,
+              filters,
+            })
           }
         
           setOpenModal(open ? "interests" : null)
@@ -404,11 +429,14 @@ export default function ProfilePage() {
               {['Men', 'Women', 'Everyone'].map((item) => (
                 <Tag
                   key={item}
-                  active={filters.interestedIn === item}
+                  active={draft.filters.interestedIn === item}
                   onClick={() =>
-                    setFilters((prev) => ({
+                    setDraft((prev) => ({
                       ...prev,
-                      interestedIn: item,
+                      filters: {
+                        ...prev.filters,
+                        interestedIn: item,
+                      },
                     }))
                   }
                 >
@@ -432,11 +460,14 @@ export default function ProfilePage() {
               ].map((item) => (
                 <Tag
                   key={item}
-                  active={filters.ageRange === item}
+                  active={draft.filters.ageRange === item}
                   onClick={() =>
-                    setFilters((prev) => ({
+                    setDraft((prev) => ({
                       ...prev,
-                      ageRange: item,
+                      filters: {
+                        ...prev.filters,
+                        ageRange: item,
+                      },
                     }))
                   }
                 >
@@ -456,20 +487,23 @@ export default function ProfilePage() {
                 type="range"
                 min="0"
                 max="51"
-                value={filters.distance}
+                value={draft.filters.distance}
                 onChange={(e) =>
-                  setFilters((prev) => ({
+                  setDraft((prev) => ({
                     ...prev,
-                    distance: e.target.value,
+                    filters: {
+                      ...prev.filters,
+                      distance: e.target.value,
+                    },
                   }))
                 }
                 className="w-full"
               />
 
               <div className="mt-3 text-center text-sm font-medium text-foreground">
-                {filters.distance === '51'
+                {draft.filters.distance === '51'
                   ? 'Any distance'
-                  : `${filters.distance} km`}
+                  : `${draft.filters.distance} km`}
               </div>
             </div>
           </div>
@@ -481,6 +515,7 @@ export default function ProfilePage() {
           size="lg"
           className="mt-5"
           onClick={() => {
+            setFilters(draft.filters)
             setOpenModal(null)
           }}
         >
@@ -492,7 +527,10 @@ export default function ProfilePage() {
         open={openModal === "photos"}
         onOpenChange={(open) => {
           if (!open) {
-            setDraft(profile)
+            setDraft({
+              ...profile,
+              filters,
+            })
             setError((prev) => ({
               ...prev,
               photos: false,
