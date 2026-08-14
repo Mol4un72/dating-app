@@ -18,21 +18,10 @@ import { Avatar } from '@/components/avatar'
 import { Tag, VerifiedBadge } from '@/components/tag'
 import { PillButton } from '@/components/pill-button'
 import { Modal } from '@/components/modal'
+import { useLikes } from '@/context/likes-context'
 import { cn } from '@/lib/utils'
 
-const LIKES_STORAGE_KEY = 'lumi_liked_users'
 const SETTINGS_STORAGE_KEY = 'lumi_settings'
-
-const readStoredLikedUsers = () => {
-  if (typeof window === 'undefined') return [] as number[]
-
-  try {
-    const stored = JSON.parse(window.localStorage.getItem(LIKES_STORAGE_KEY) ?? '[]')
-    return Array.isArray(stored) ? stored.map(Number) : []
-  } catch {
-    return [] as number[]
-  }
-}
 
 const readStoredBlockedUsers = () => {
   if (typeof window === 'undefined') return [] as string[]
@@ -48,12 +37,10 @@ const readStoredBlockedUsers = () => {
 export default function UserProfilePage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
+  const { isLiked, toggleLike, removeLike } = useLikes()
   const id = params.id
   const user = people.find((person) => person.id === Number(id))
 
-  const [isLiked, setIsLiked] = useState<boolean>(() =>
-    readStoredLikedUsers().includes(Number(user?.id ?? -1))
-  )
   const [isBlocked, setIsBlocked] = useState<boolean>(() =>
     readStoredBlockedUsers().includes(user?.name ?? '')
   )
@@ -95,12 +82,6 @@ export default function UserProfilePage() {
     )
   }
 
-  const persistLikedUsers = (nextLikedUsers: number[]) => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(nextLikedUsers))
-    }
-  }
-
   const persistBlockedUsers = (nextBlockedUsers: string[]) => {
     if (typeof window !== 'undefined') {
       const savedSettings = JSON.parse(window.localStorage.getItem(SETTINGS_STORAGE_KEY) ?? '{}')
@@ -114,15 +95,9 @@ export default function UserProfilePage() {
   }
 
   const handleLike = () => {
-    const next = !isLiked
-    const currentLikedUsers = readStoredLikedUsers()
-    const nextLikedUsers = next
-      ? [...new Set([...currentLikedUsers, user.id])]
-      : currentLikedUsers.filter((likedId) => likedId !== user.id)
-
-    persistLikedUsers(nextLikedUsers)
-    setIsLiked(next)
-    showToast(next ? `You liked ${user.name}` : `You removed ${user.name} from likes`, next ? 'success' : 'info')
+    const wasLiked = isLiked(user?.id ?? -1)
+    toggleLike(user?.id ?? -1)
+    showToast(wasLiked ? `You removed ${user?.name} from likes` : `You liked ${user?.name}`, wasLiked ? 'info' : 'success')
   }
 
   const handleMessage = () => {
@@ -152,6 +127,12 @@ export default function UserProfilePage() {
       : currentBlockedUsers.filter((blockedUser: string) => blockedUser !== user.name)
 
     persistBlockedUsers(nextBlockedUsers)
+    
+    // Remove like when blocking
+    if (next && isLiked(user.id)) {
+      removeLike(user.id)
+    }
+    
     setIsBlocked(next)
     setConfirmAction(null)
     showToast(next ? `${user.name} has been blocked` : `${user.name} is no longer blocked`, next ? 'success' : 'info')
@@ -223,11 +204,11 @@ export default function UserProfilePage() {
             <div className="mt-5 flex w-full gap-2">
               <PillButton
                 block
-                variant={isLiked ? 'secondary' : 'primary'}
+                variant={isLiked(user.id) ? 'secondary' : 'primary'}
                 onClick={handleLike}
               >
-                <Heart className={cn('size-4', isLiked && 'fill-current')} />
-                {isLiked ? 'Liked' : 'Like'}
+                <Heart className={cn('size-4', isLiked(user.id) && 'fill-current')} />
+                {isLiked(user.id) ? 'Liked' : 'Like'}
               </PillButton>
 
               <PillButton block variant="outline" onClick={handleMessage} disabled={isBlocked}>

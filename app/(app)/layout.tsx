@@ -1,5 +1,6 @@
 import { AppShell } from '@/components/app-shell'
 import { FiltersProvider } from '@/context/filters-context'
+import { LikesProvider } from '@/context/likes-context'
 
 export default function AppGroupLayout({
   children,
@@ -7,8 +8,10 @@ export default function AppGroupLayout({
   children: React.ReactNode
 }) {
   return (
-    <FiltersProvider>
-      <AppShell>{children}</AppShell>
-    </FiltersProvider>
+    <LikesProvider>
+      <FiltersProvider>
+        <AppShell>{children}</AppShell>
+      </FiltersProvider>
+    </LikesProvider>
   )
 }

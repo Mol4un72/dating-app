@@ -1,10 +1,24 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { FiltersModal } from '@/components/people/filters-modal'
 import { MapPin, BadgeCheck, SlidersHorizontal } from 'lucide-react'
-import { type Person, currentUser } from '@/lib/data'
+import { type Person } from '@/lib/data'
+import { useLikes } from '@/context/likes-context'
 import { cn } from '@/lib/utils'
+
+// Custom hook to safely access client-only state after hydration
+function useHydrated() {
+  const [hydrated, setHydrated] = useState(false)
+
+  useLayoutEffect(() => {
+    // This is intentional - we need to trigger a re-render after hydration to avoid mismatch
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHydrated(true)
+  }, [])
+
+  return hydrated
+}
 
 export function SwipeDeck({ people }: { people: Person[] }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -84,9 +98,10 @@ function ProfileCard({
 }) {
   const likeLock = useRef(false)
   const lastTap = useRef(0)
+  const { isLiked, toggleLike } = useLikes()
+  const isHydrated = useHydrated()
 
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [liked, setLiked] = useState(false)
 
   const [tapHearts, setTapHearts] = useState<
     {
@@ -97,23 +112,10 @@ function ProfileCard({
     }[]
   >([])
 
-  useEffect(() => {
-    setLiked(
-      currentUser.likedUsers.includes(person.id)
-    )
-  }, [person.id])
+  const liked = isHydrated ? isLiked(person.id) : false
 
-
-  function toggleLike() {
-    const index = currentUser.likedUsers.indexOf(person.id)
-
-    if (index !== -1) {
-      currentUser.likedUsers.splice(index, 1)
-      setLiked(false)
-    } else {
-      currentUser.likedUsers.push(person.id)
-      setLiked(true)
-    }
+  function handleToggleLike() {
+    toggleLike(person.id)
   }
 
 
@@ -136,7 +138,7 @@ function ProfileCard({
     }, 300)
 
 
-    toggleLike()
+    handleToggleLike()
 
 
     const rect = currentTarget.getBoundingClientRect()
@@ -274,7 +276,7 @@ function ProfileCard({
             {liked && (
               <button
                 type="button"
-                onClick={toggleLike}
+                onClick={handleToggleLike}
                 className="grid size-8 place-items-center rounded-full bg-white/90 text-xl shadow-md"
               >
                 ❤️
