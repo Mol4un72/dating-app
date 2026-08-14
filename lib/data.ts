@@ -271,19 +271,19 @@ export const currentUser = {
     appUpdates: false,
     emailAlerts: true,
 
-    profileVisibility: 'everyone',
+    profileVisibility: 'everyone' as const,
     showOnlineStatus: true,
     shareData: true,
     blockedUsers: ['spammer.joe@example.com', 'ex.partner@example.com'],
 
     interestedIn: 'Everyone',
     ageRange: '25 – 35',
-    maxDistance: '20',
+    maxDistance: 20,
     verifiedOnly: false,
 
     email: 'elena.kovalenko@example.com',
     phone: '+1 (555) 019-2834',
-    language: 'English'
+    language: 'English',
   }
 }
 

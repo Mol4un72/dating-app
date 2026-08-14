@@ -45,9 +45,13 @@ export function AppShell({
 }) {
   const pathname = usePathname()
 
-  const isActive = (href: string) =>
-    pathname === href ||
-    pathname.startsWith(href + '/')
+  const isActive = (href: string) => {
+    if (href === '/profile') {
+      // Only highlight Profile for user's own profile, not when viewing other users
+      return pathname === '/profile' || pathname === '/profile/settings'
+    }
+    return pathname === href || pathname.startsWith(href + '/')
+  }
 
   const [keyboardOpen, setKeyboardOpen] = useState(false)
 
