@@ -4,28 +4,36 @@ import { useState } from 'react'
 import { AppTopBar } from '@/components/app-topbar'
 import { LikedCard } from '@/components/people/liked-card'
 import { NotificationsButton } from '@/components/notifications-button'
-import { people, currentUser } from '@/lib/data'
+import { people } from '@/lib/data'
 
+const getSavedLikedUsers = () => {
+  if (typeof window === 'undefined') return [] as number[]
+
+  try {
+    const stored = JSON.parse(window.localStorage.getItem('lumi_liked_users') ?? '[]')
+    return Array.isArray(stored) ? stored.map(Number) : []
+  } catch {
+    return [] as number[]
+  }
+}
 
 export default function LikesPage() {
-  const [likedPeople, setLikedPeople] = useState(
-    people.filter((person) =>
-      currentUser.likedUsers.includes(person.id)
-    )
+  const [likedPeople, setLikedPeople] = useState(() =>
+    people.filter((person) => getSavedLikedUsers().includes(person.id))
   )
 
   const handleDislike = (id: number) => {
+    const nextLikedUsers = getSavedLikedUsers().filter((likedId) => likedId !== id)
 
     setLikedPeople((prev) =>
       prev.filter((person) => person.id !== id)
     )
 
-    currentUser.likedUsers =
-      currentUser.likedUsers.filter(
-        (likedId) => likedId !== id
-      )
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('lumi_liked_users', JSON.stringify(nextLikedUsers))
+    }
   }
-  
+
   return (
     <>
       <AppTopBar title="Likes" actions={<NotificationsButton />}/>
