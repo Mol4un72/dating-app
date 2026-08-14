@@ -17,6 +17,7 @@ import { people } from '@/lib/data'
 import { Avatar } from '@/components/avatar'
 import { Tag, VerifiedBadge } from '@/components/tag'
 import { PillButton } from '@/components/pill-button'
+import { Modal } from '@/components/modal'
 import { cn } from '@/lib/utils'
 
 const LIKES_STORAGE_KEY = 'lumi_liked_users'
@@ -56,6 +57,7 @@ export default function UserProfilePage() {
   const [isBlocked, setIsBlocked] = useState<boolean>(() =>
     readStoredBlockedUsers().includes(user?.name ?? '')
   )
+  const [confirmAction, setConfirmAction] = useState<'report' | 'block' | null>(null)
   const [toast, setToast] = useState<{
     message: string
     type: 'success' | 'error' | 'info'
@@ -129,23 +131,56 @@ export default function UserProfilePage() {
   }
 
   const handleReport = () => {
-    showToast(`Thanks, we’ll review ${user.name}&apos;s profile`, 'info')
+    setConfirmAction('report')
   }
 
   const handleBlock = () => {
+    setConfirmAction('block')
+  }
+
+  const confirmCurrentAction = () => {
+    if (confirmAction === 'report') {
+      setConfirmAction(null)
+      showToast(`Thanks, we'll review ${user.name}&apos;s profile`, 'info')
+      return
+    }
+
     const next = !isBlocked
     const currentBlockedUsers = readStoredBlockedUsers()
     const nextBlockedUsers = next
       ? [...new Set([...currentBlockedUsers, user.name])]
-      : currentBlockedUsers.filter((blockedUser) => blockedUser !== user.name)
+      : currentBlockedUsers.filter((blockedUser: string) => blockedUser !== user.name)
 
     persistBlockedUsers(nextBlockedUsers)
     setIsBlocked(next)
+    setConfirmAction(null)
     showToast(next ? `${user.name} has been blocked` : `${user.name} is no longer blocked`, next ? 'success' : 'info')
   }
 
   return (
     <>
+      <Modal
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmAction(null)
+        }}
+        title={confirmAction === 'block' ? 'Block this profile?' : 'Report this profile?'}
+        description={
+          confirmAction === 'block'
+            ? `This will hide ${user.name} from your profile feed and add them to your block list.`
+            : `We'll review ${user.name}'s profile to check if it violates our community guidelines.`
+        }
+      >
+        <div className="flex gap-2">
+          <PillButton block variant="outline" onClick={() => setConfirmAction(null)}>
+            Cancel
+          </PillButton>
+          <PillButton block onClick={confirmCurrentAction}>
+            {confirmAction === 'block' ? (isBlocked ? 'Unblock' : 'Block') : 'Report'}
+          </PillButton>
+        </div>
+      </Modal>
+
       {toast && (
         <div
           className={cn(
@@ -195,9 +230,9 @@ export default function UserProfilePage() {
                 {isLiked ? 'Liked' : 'Like'}
               </PillButton>
 
-              <PillButton block variant="outline" onClick={handleMessage}>
+              <PillButton block variant="outline" onClick={handleMessage} disabled={isBlocked}>
                 <MessageCircle className="size-4" />
-                Message
+                {isBlocked ? 'Blocked' : 'Message'}
               </PillButton>
             </div>
           </section>
