@@ -13,8 +13,9 @@ const LIKES_STORAGE_KEY = 'lumi_liked_users'
 type LikesContextType = {
   likedUserIds: number[]
   toggleLike: (userId: number) => void
-  isLiked: (userId: number) => boolean
+  addLike: (userId: number) => void
   removeLike: (userId: number) => void
+  isLiked: (userId: number) => boolean
 }
 
 const LikesContext = createContext<LikesContextType | undefined>(undefined)
@@ -54,8 +55,13 @@ export function LikesProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const isLiked = (userId: number) => {
-    return likedUserIds.includes(userId)
+  const addLike = (userId: number) => {
+    setLikedUserIds((prev) => {
+      if (prev.includes(userId)) return prev
+      const next = [...prev, userId]
+      persistLikes(next)
+      return next
+    })
   }
 
   const removeLike = (userId: number) => {
@@ -66,13 +72,18 @@ export function LikesProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  const isLiked = (userId: number) => {
+    return likedUserIds.includes(userId)
+  }
+
   return (
     <LikesContext.Provider
       value={{
         likedUserIds,
         toggleLike,
-        isLiked,
+        addLike,
         removeLike,
+        isLiked,
       }}
     >
       {children}
