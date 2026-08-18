@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar } from '@/components/avatar'
-import { conversations, messages as seedMessages, type Message } from '@/lib/data'
+import { conversations, type Message } from '@/lib/data'
 import { cn } from '@/lib/utils'
 import EmojiPicker from 'emoji-picker-react'
 
@@ -89,6 +89,7 @@ export function ChatMessenger({ activeId }: { activeId?: string }) {
             photo={active.photo}
             online={active.online}
             personId={active.personId}
+            messages={active.messages}
           />
         ) : (
           <div className="hidden flex-1 flex-col items-center justify-center gap-3 p-8 text-center lg:flex">
@@ -111,13 +112,15 @@ function Conversation({
   photo,
   online,
   personId,
+  messages,
 }: {
   name: string
   photo: string
   online: boolean
   personId: number
+  messages: Message[]
 }) {
-  const [items, setItems] = useState<Message[]>(seedMessages)
+  const [items, setItems] = useState<Message[]>(messages)
   const [draft, setDraft] = useState('')
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
