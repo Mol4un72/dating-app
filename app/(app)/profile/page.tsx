@@ -548,7 +548,6 @@ export default function ProfilePage() {
             type="file"
             accept="image/*"
             hidden
-            onChange={handlePhotoUpload}
           />
           <div className="grid grid-cols-3 gap-3">
             {draft.photos.map((photo, index) => (

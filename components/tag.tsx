@@ -13,7 +13,7 @@ export function Tag({
   onClick?: () => void
 }) {
   return (
-    <span
+    <button
       onClick={onClick}
       className={cn(
         'inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
@@ -24,7 +24,7 @@ export function Tag({
       )}
     >
       {children}
-    </span>
+    </button>
   )
 }
 

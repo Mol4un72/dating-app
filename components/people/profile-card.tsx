@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef, useLayoutEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { MapPin, BadgeCheck, SlidersHorizontal } from 'lucide-react'
+import { FiltersModal } from './filters-modal'
 import { type Person } from '@/lib/data'
 import { useLikes } from '@/context/likes-context'
 import { cn } from '@/lib/utils'
@@ -9,7 +10,7 @@ import { cn } from '@/lib/utils'
 function useHydrated() {
   const [hydrated, setHydrated] = useState(false)
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     setHydrated(true)
   }, [])
 
@@ -23,12 +24,14 @@ export function ProfileCard({
 }: {
   person: Person
   className?: string
-  onFiltersOpen: () => void
+  onFiltersOpen?: () => void
 }) {
   const likeLock = useRef(false)
   const lastTap = useRef(0)
   const { isLiked, addLike, removeLike } = useLikes()
   const isHydrated = useHydrated()
+
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const [tapHearts, setTapHearts] = useState<
     {
@@ -147,7 +150,7 @@ export function ProfileCard({
             type="button"
             onClick={(e) => {
               e.stopPropagation()
-              onFiltersOpen()
+              setFiltersOpen(true)
             }}
             className="absolute right-2 top-2 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-secondary"
           >
@@ -202,6 +205,8 @@ export function ProfileCard({
           </div>
         </div>
       </div>
+
+      <FiltersModal open={filtersOpen} onOpenChange={setFiltersOpen} />
 
       <style jsx>{`
         @keyframes tapHeartFade {
