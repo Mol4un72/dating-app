@@ -9,6 +9,7 @@ export type Person = {
   photo: string
   photos: string[]
   verified: boolean
+  sex: 'male' | 'female'
 }
 
 export type NotificationType =
@@ -62,6 +63,7 @@ export interface PasswordState {
 export const people: Person[] = [
   {
     id: 0,
+    sex: 'female',
     name: 'Sophie',
     age: 26,
     location: 'Brooklyn, NY',
@@ -74,6 +76,7 @@ export const people: Person[] = [
   },
   {
     id: 1,
+    sex: 'male',
     name: 'James',
     age: 31,
     location: 'Manhattan, NY',
@@ -86,6 +89,7 @@ export const people: Person[] = [
   },
   {
     id: 2,
+    sex: 'female',
     name: 'Mia',
     age: 24,
     location: 'Queens, NY',
@@ -98,6 +102,7 @@ export const people: Person[] = [
   },
   {
     id: 3,
+    sex: 'male',
     name: 'Liam',
     age: 29,
     location: 'Jersey City, NJ',
@@ -110,6 +115,7 @@ export const people: Person[] = [
   },
   {
     id: 4,
+    sex: 'female',
     name: 'Ava',
     age: 28,
     location: 'Hoboken, NJ',
@@ -122,6 +128,7 @@ export const people: Person[] = [
   },
   {
     id: 5,
+    sex: 'male',
     name: 'Noah',
     age: 27,
     location: 'Brooklyn, NY',
