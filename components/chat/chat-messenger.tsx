@@ -269,8 +269,10 @@ function Conversation({
             />
 
             <button
+              type="button"
               onClick={() => setSelectedImage(null)}
-              className="absolute -right-2 -top-2 grid size-6 rounded-full bg-black text-white"
+              className="absolute -right-2 -top-2 grid size-6 rounded-full bg-black text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              aria-label="Remove attachment"
             >
               <span className="-translate-y-0.5">×</span>
             </button>
@@ -344,12 +346,13 @@ function Conversation({
           </button>
         </div>
         <button
+          type="button"
           onMouseDown={(e) => {
             e.preventDefault()
             send()
           }}
           aria-label="Send message"
-          className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform active:scale-90"
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <Send className="size-5" />
         </button>

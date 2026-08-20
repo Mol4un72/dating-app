@@ -15,7 +15,7 @@
 ### P1
 
 - [x] Зробити інтерактивні елементи доступними з клавіатури. `components/tag.tsx` і `components/people/liked-card.tsx` використовують клікабельні `span`; замінити їх на `button` (або додати коректні role, keyboard handlers і focus state). Для кнопки серця у Likes виправити `aria-label`: дія там — видалити like, а не поставити його.
-- [ ] Виправити недоступні/неповні кнопки у локальному UI: додати `type="button"` до не-submit кнопок, доступну назву кнопці закриття delete-modal у `app/(app)/profile/settings/page.tsx`, та перевірити tab order/focus visible у власних елементах керування.
+- [x] Виправити недоступні/неповні кнопки у локальному UI: додано `type="button"` до не-submit кнопок, доступну назву кнопці закриття delete-modal у `app/(app)/profile/settings/page.tsx` і `focus-visible` індикатори для custom controls; неінтерактивні `Tag` більше не потрапляють у tab order.
 - [ ] Уніфікувати модалки через `components/modal.tsx`. Logout і Delete Account у Settings зараз написані окремо, тому не мають гарантованих focus trap, Escape та повернення фокусу; базовий `Modal` на `@base-ui/react/dialog` це вже забезпечує.
 - [ ] Замінити `alert()` при валідації фото у `app/(app)/profile/page.tsx` на inline error/toast. Повідомлення мають бути зрозумілими, не блокувати браузер і скидатися при успішному виборі файлу.
 - [ ] Керувати життєвим циклом preview URL. Викликати `URL.revokeObjectURL` при заміні/видаленні фото та unmount у Profile і Chat, інакше локальні image-preview накопичують пам’ять.

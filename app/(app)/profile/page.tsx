@@ -227,7 +227,8 @@ export default function ProfilePage() {
               <div className='my-5'>
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground">Interests</h2>
-                  <button 
+                  <button
+                    type="button"
                     onClick={() => {
                       setDraft({
                         ...profile,
@@ -235,7 +236,7 @@ export default function ProfilePage() {
                       })
                       setOpenModal('interests')}
                     } 
-                    className="text-sm font-medium text-primary hover:underline">Manage</button>
+                    className="text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">Manage</button>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {profile.interests.map((interest) => (
@@ -251,7 +252,8 @@ export default function ProfilePage() {
               <div className='my-5'>
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
-                  <button 
+                  <button
+                    type="button"
                     onClick={() => {
                       setDraft({
                         ...profile,
@@ -260,7 +262,7 @@ export default function ProfilePage() {
                     
                       setOpenModal('preferences')
                     }}
-                    className="text-sm font-medium text-primary hover:underline">Manage</button>
+                    className="text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">Manage</button>
                 </div>
                 <ul className="mt-4 flex flex-col gap-4">
                   <PreferenceRow icon={Users} label="Interested in" value={filters.interestedIn} />
@@ -275,6 +277,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground">Photos</h2>
                   <button
+                    type="button"
                     onClick={() => {
                       setDraft({
                         ...profile,
@@ -282,7 +285,7 @@ export default function ProfilePage() {
                       })
                       setOpenModal("photos")
                     }}
-                    className="text-sm font-medium text-primary hover:underline">Manage</button>
+                    className="text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">Manage</button>
                 </div>
                 <div className="mt-4 grid grid-cols-3 gap-3">
                   {profile.photos.map((photo, i) => (
@@ -631,4 +634,3 @@ function PreferenceRow({
     </li>
   )
 }
-
