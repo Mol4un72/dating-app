@@ -33,13 +33,14 @@ export function LikedCard({
                         <MapPin className="size-3" /> {person.distance}
                     </p>
                 </div>
-                <span 
+                <button
+                    type="button"
                     onClick={onDislike}
-                    className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-background/90 text-[20px] text-primary shadow-md backdrop-blur transition-transform active:scale-90"
-                    aria-label={`Like ${person.name}`}
+                    className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-background/90 text-[20px] text-primary shadow-md backdrop-blur transition-transform active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    aria-label={`Remove ${person.name} from likes`}
                 >
                     ❤️
-                </span>
+                </button>
             </div>
         </article>
     )

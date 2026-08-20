@@ -12,19 +12,30 @@ export function Tag({
   className?: string
   onClick?: () => void
 }) {
+  const classes = cn(
+    'inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
+    active
+      ? 'bg-primary text-primary-foreground'
+      : 'bg-secondary text-secondary-foreground',
+    className,
+  )
+
+  if (!onClick) {
+    return <span className={classes}>{children}</span>
+  }
+
   return (
-    <span
+    <button
+      type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={cn(
-        'inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
-        active
-          ? 'bg-primary text-primary-foreground'
-          : 'bg-secondary text-secondary-foreground',
-        className,
+        classes,
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
       )}
     >
       {children}
-    </span>
+    </button>
   )
 }
 

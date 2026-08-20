@@ -12,13 +12,29 @@ export function SwipeDeck({
   onOpenFilters?: () => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const { filters } = useFilters()
+  const [filtersOpen, setFiltersOpen] = useState(false)
+
+  const filteredPeople = useMemo(() => {
+    const sex = filters.interestedIn === 'Men'
+      ? 'male'
+      : filters.interestedIn === 'Women'
+        ? 'female'
+        : undefined
+
+    return people.filter((person) => (
+      (!sex || person.sex === sex) &&
+      isInAgeRange(person.age, filters.ageRange) &&
+      isWithinDistance(person, filters.distance)
+    ))
+  }, [filters, people])
 
   useEffect(() => {
     const savedId = localStorage.getItem('currentProfile')
 
     if (!savedId || !containerRef.current) return
 
-    const index = people.findIndex(
+    const index = filteredPeople.findIndex(
       (person) => person.id === Number(savedId)
     )
 
@@ -43,7 +59,7 @@ export function SwipeDeck({
       containerRef.current.clientHeight
     )
 
-    const person = people[index]
+    const person = filteredPeople[index]
 
     if (person) {
       localStorage.setItem(
@@ -77,8 +93,10 @@ export function SwipeDeck({
             onOpenFilters={onOpenFilters}
             className="h-full shrink-0 snap-start snap-always"
           />
-        ))}
+        )}
       </div>
+
+      <FiltersModal open={filtersOpen} onOpenChange={setFiltersOpen} />
     </div>
   )
 }

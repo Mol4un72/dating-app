@@ -28,7 +28,7 @@ type Props = VariantProps<typeof pillButton> & {
   href?: string
 } & React.ButtonHTMLAttributes<HTMLButtonElement>
 
-export function PillButton({ className, variant, size, block, href, ...props }: Props) {
+export function PillButton({ className, variant, size, block, href, type, ...props }: Props) {
   const classes = cn(pillButton({ variant, size, block }), className)
   if (href) {
     return (
@@ -37,5 +37,5 @@ export function PillButton({ className, variant, size, block, href, ...props }: 
       </Link>
     )
   }
-  return <button className={classes} {...props} />
+  return <button type={type ?? 'button'} className={classes} {...props} />
 }

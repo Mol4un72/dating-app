@@ -22,14 +22,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar } from '@/components/avatar'
-import { conversations, messages as seedMessages, type Message } from '@/lib/data'
+import { conversations, type Message } from '@/lib/data'
 import { cn } from '@/lib/utils'
 import EmojiPicker from 'emoji-picker-react'
+import { NotFound } from '@/components/non-found'
+import { PillButton } from '@/components/pill-button'
 
 export function ChatMessenger({ activeId }: { activeId?: string }) {
   const active = activeId
-    ? conversations.find((c) => c.id === activeId) ?? conversations[0]
+    ? conversations.find((c) => c.id === activeId)
     : undefined
+
+  if (activeId && !active) {
+    return (
+      <NotFound
+        className="min-h-[calc(100svh-var(--nav-h,4rem))] lg:min-h-svh"
+        title="Conversation not found"
+        description="This conversation may have been removed or the link is no longer valid."
+        action={<PillButton href="/chat">Back to messages</PillButton>}
+      />
+    )
+  }
 
   return (
     <div className="flex h-[calc(100svh-var(--nav-h,4rem))] w-full lg:h-svh overflow-hidden">
@@ -89,6 +102,7 @@ export function ChatMessenger({ activeId }: { activeId?: string }) {
             photo={active.photo}
             online={active.online}
             personId={active.personId}
+            messages={active.messages}
           />
         ) : (
           <div className="hidden flex-1 flex-col items-center justify-center gap-3 p-8 text-center lg:flex">
@@ -111,13 +125,15 @@ function Conversation({
   photo,
   online,
   personId,
+  messages,
 }: {
   name: string
   photo: string
   online: boolean
   personId: number
+  messages: Message[]
 }) {
-  const [items, setItems] = useState<Message[]>(seedMessages)
+  const [items, setItems] = useState<Message[]>(messages)
   const [draft, setDraft] = useState('')
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
@@ -266,8 +282,10 @@ function Conversation({
             />
 
             <button
+              type="button"
               onClick={() => setSelectedImage(null)}
-              className="absolute -right-2 -top-2 grid size-6 rounded-full bg-black text-white"
+              className="absolute -right-2 -top-2 grid size-6 rounded-full bg-black text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              aria-label="Remove attachment"
             >
               <span className="-translate-y-0.5">×</span>
             </button>
@@ -341,12 +359,13 @@ function Conversation({
           </button>
         </div>
         <button
+          type="button"
           onMouseDown={(e) => {
             e.preventDefault()
             send()
           }}
           aria-label="Send message"
-          className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform active:scale-90"
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <Send className="size-5" />
         </button>

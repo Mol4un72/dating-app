@@ -185,8 +185,9 @@ export default function SettingsPage() {
         title={selectedTab ? tabList.find(t => t.id === selectedTab)?.label : "Settings"}
         actions={
           <button
+            type="button"
             onClick={() => selectedTab ? setSelectedTab(null) : router.push('/profile')}
-            className="lg:hidden flex items-center gap-1 text-sm font-medium text-primary hover:underline px-3 py-1.5"
+            className="lg:hidden flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <ArrowLeft className="size-4" /> Back
           </button>
@@ -229,9 +230,10 @@ export default function SettingsPage() {
               <section className="rounded-3xl border border-border bg-card p-2 shadow-sm flex flex-col gap-1">
                 {tabList.map(tab => (
                   <button
+                    type="button"
                     key={tab.id}
                     onClick={() => setSelectedTab(tab.id)}
-                    className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-colors hover:bg-secondary"
+                    className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
                   >
                     <tab.icon className="size-5 text-foreground shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -246,15 +248,17 @@ export default function SettingsPage() {
               {/* Danger/Action List */}
               <section className="rounded-3xl border border-border bg-card p-2 shadow-sm flex flex-col gap-1">
                 <button
+                  type="button"
                   onClick={() => setShowLogoutModal(true)}
-                  className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-colors hover:bg-destructive/10 text-destructive"
+                  className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
                 >
                   <LogOut className="size-5 shrink-0" />
                   <span className="text-sm font-semibold">Log out</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowDeleteModal(true)}
-                  className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-colors hover:bg-destructive/10 text-destructive"
+                  className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
                 >
                   <Trash2 className="size-5 shrink-0" />
                   <span className="text-sm font-semibold">Delete account</span>
@@ -307,10 +311,11 @@ export default function SettingsPage() {
                 const active = selectedTab === tab.id
                 return (
                   <button
+                    type="button"
                     key={tab.id}
                     onClick={() => setSelectedTab(tab.id)}
                     className={cn(
-                      'flex items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all',
+                      'flex items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset',
                       active
                         ? 'bg-accent text-primary font-semibold'
                         : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
@@ -325,15 +330,17 @@ export default function SettingsPage() {
               <hr className="my-2 border-border" />
 
               <button
+                type="button"
                 onClick={() => setShowLogoutModal(true)}
-                className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors hover:bg-destructive/10 text-destructive"
+                className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
               >
                 <LogOut className="size-5 shrink-0" />
                 <span className="text-sm font-semibold">Log out</span>
               </button>
               <button
+                type="button"
                 onClick={() => setShowDeleteModal(true)}
-                className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors hover:bg-destructive/10 text-destructive"
+                className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
               >
                 <Trash2 className="size-5 shrink-0" />
                 <span className="text-sm font-semibold">Delete account</span>
@@ -401,11 +408,13 @@ export default function SettingsPage() {
                 </p>
               </div>
               <button
+                type="button"
+                aria-label="Close delete account dialog"
                 onClick={() => {
                   setShowDeleteModal(false)
                   setDeleteConfirmText('')
                 }}
-                className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+                className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <X className="size-4" />
               </button>

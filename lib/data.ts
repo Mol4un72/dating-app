@@ -10,6 +10,7 @@ export type Person = {
   photo: string
   photos: string[]
   verified: boolean
+  sex: 'male' | 'female'
 }
 
 export type NotificationType =
@@ -63,6 +64,7 @@ export interface PasswordState {
 export const people: Person[] = [
   {
     id: 0,
+    sex: 'female',
     name: 'Sophie',
     age: 26,
     gender: 'Women',
@@ -76,6 +78,7 @@ export const people: Person[] = [
   },
   {
     id: 1,
+    sex: 'male',
     name: 'James',
     age: 31,
     gender: 'Men',
@@ -89,6 +92,7 @@ export const people: Person[] = [
   },
   {
     id: 2,
+    sex: 'female',
     name: 'Mia',
     age: 24,
     gender: 'Women',
@@ -102,19 +106,7 @@ export const people: Person[] = [
   },
   {
     id: 3,
-    name: 'Liam',
-    age: 29,
-    gender: 'Men',
-    location: 'Jersey City, NJ',
-    distance: '11 km away',
-    bio: 'Music producer chasing good vibes and better tacos. Will absolutely bring you to a live show.',
-    interests: ['Music', 'Concerts', 'Food', 'Skating', 'Vinyl'],
-    photo: '/people/liam.png',
-    photos: ['/people/liam.png', '/people/james.png', '/people/noah.png'],
-    verified: true,
-  },
-  {
-    id: 4,
+    sex: 'female',
     name: 'Ava',
     age: 28,
     gender: 'Women',
@@ -127,7 +119,21 @@ export const people: Person[] = [
     verified: true,
   },
   {
+    id: 4,
+    sex: 'male',
+    name: 'Liam',
+    age: 29,
+    location: 'Jersey City, NJ',
+    distance: '11 km away',
+    bio: 'Music producer chasing good vibes and better tacos. Will absolutely bring you to a live show.',
+    interests: ['Music', 'Concerts', 'Food', 'Skating', 'Vinyl'],
+    photo: '/people/liam.png',
+    photos: ['/people/liam.png', '/people/james.png', '/people/noah.png'],
+    verified: true,
+  },
+  {
     id: 5,
+    sex: 'male',
     name: 'Noah',
     age: 27,
     gender: 'Men',
@@ -150,6 +156,7 @@ export type Conversation = {
   lastMessage: string
   time: string
   unread: number
+  messages: Message[]
 }
 
 export const conversations: Conversation[] = [
@@ -162,7 +169,28 @@ export const conversations: Conversation[] = [
     lastMessage: 'That trail sounds perfect — Saturday?',
     time: '2m',
     unread: 2,
+    messages: [
+      { id: 'm1', fromMe: false, text: 'Hey! Loved your photos from the coast 🌊', time: '9:41 AM' },
+      { id: 'm2', fromMe: true, text: 'Thank you! That was last summer in Maine', time: '9:42 AM' },
+      {
+        id: 'm3',
+        fromMe: false,
+        image: '/people/mia.png',
+        text: 'Here’s one from my trip too',
+        time: '9:44 AM',
+      },
+      {
+        id: 'm4',
+        fromMe: true,
+        text: 'Okay that’s stunning 😍',
+        time: '9:45 AM',
+        reaction: '❤️',
+      },
+      { id: 'm5', fromMe: false, text: 'There’s a great trail nearby if you’re into hiking', time: '9:46 AM' },
+      { id: 'm6', fromMe: true, text: 'I’m very into hiking. That trail sounds perfect — Saturday?', time: '9:47 AM' },
+    ],
   },
+
   {
     id: 'c2',
     personId: 1,
@@ -172,7 +200,46 @@ export const conversations: Conversation[] = [
     lastMessage: 'I’ll send you the risotto recipe 🍚',
     time: '18m',
     unread: 0,
+    messages: [
+      {
+        id: 'm7',
+        fromMe: true,
+        text: 'Are you still cooking tonight?',
+        time: '8:12 AM',
+      },
+      {
+        id: 'm8',
+        fromMe: false,
+        text: 'Yep! Thinking about making something Italian.',
+        time: '8:14 AM',
+      },
+      {
+        id: 'm9',
+        fromMe: true,
+        text: 'Pasta?',
+        time: '8:15 AM',
+      },
+      {
+        id: 'm10',
+        fromMe: false,
+        text: 'I was actually thinking risotto 🍚',
+        time: '8:16 AM',
+      },
+      {
+        id: 'm11',
+        fromMe: true,
+        text: 'That sounds way better. I’ve never made it properly.',
+        time: '8:18 AM',
+      },
+      {
+        id: 'm12',
+        fromMe: false,
+        text: 'I’ll send you the risotto recipe 🍚',
+        time: '8:20 AM',
+      },
+    ],
   },
+
   {
     id: 'c3',
     personId: 2,
@@ -182,7 +249,47 @@ export const conversations: Conversation[] = [
     lastMessage: 'The exhibit was unreal, you’d love it',
     time: '1h',
     unread: 0,
+    messages: [
+      {
+        id: 'm13',
+        fromMe: false,
+        text: 'Have you been to the new gallery downtown?',
+        time: '7:31 AM',
+      },
+      {
+        id: 'm14',
+        fromMe: true,
+        text: 'Not yet. Is it worth checking out?',
+        time: '7:34 AM',
+      },
+      {
+        id: 'm15',
+        fromMe: false,
+        text: 'Absolutely. The photography section was incredible.',
+        time: '7:36 AM',
+      },
+      {
+        id: 'm16',
+        fromMe: true,
+        text: 'Okay, you’ve convinced me 😄',
+        time: '7:38 AM',
+      },
+      {
+        id: 'm17',
+        fromMe: false,
+        text: 'I knew you’d like it.',
+        time: '7:40 AM',
+        reaction: '❤️',
+      },
+      {
+        id: 'm18',
+        fromMe: false,
+        text: 'The exhibit was unreal, you’d love it',
+        time: '7:42 AM',
+      },
+    ],
   },
+
   {
     id: 'c4',
     personId: 3,
@@ -192,7 +299,53 @@ export const conversations: Conversation[] = [
     lastMessage: 'Haha okay you win this round',
     time: '3h',
     unread: 0,
+    messages: [
+      {
+        id: 'm19',
+        fromMe: false,
+        text: 'I still think my movie recommendation was better.',
+        time: '6:02 AM',
+      },
+      {
+        id: 'm20',
+        fromMe: true,
+        text: 'You mean the movie where absolutely nothing happened? 😂',
+        time: '6:05 AM',
+      },
+      {
+        id: 'm21',
+        fromMe: false,
+        text: 'It was atmospheric!',
+        time: '6:07 AM',
+      },
+      {
+        id: 'm22',
+        fromMe: true,
+        text: 'That’s a fancy way of saying boring.',
+        time: '6:09 AM',
+        reaction: '😂',
+      },
+      {
+        id: 'm23',
+        fromMe: false,
+        text: 'Okay, what’s your pick then?',
+        time: '6:11 AM',
+      },
+      {
+        id: 'm24',
+        fromMe: true,
+        text: 'I’ll send you one tonight. Prepare to be impressed.',
+        time: '6:13 AM',
+      },
+      {
+        id: 'm25',
+        fromMe: false,
+        text: 'Haha okay you win this round',
+        time: '6:15 AM',
+      },
+    ],
   },
+
   {
     id: 'c5',
     personId: 4,
@@ -202,6 +355,51 @@ export const conversations: Conversation[] = [
     lastMessage: 'Got us tickets for Friday 🎶',
     time: '1d',
     unread: 1,
+    messages: [
+      {
+        id: 'm26',
+        fromMe: true,
+        text: 'Did you see that the band is coming next month?',
+        time: 'Yesterday',
+      },
+      {
+        id: 'm27',
+        fromMe: false,
+        text: 'No way! Where are they playing?',
+        time: 'Yesterday',
+      },
+      {
+        id: 'm28',
+        fromMe: true,
+        text: 'At the old theater downtown.',
+        time: 'Yesterday',
+      },
+      {
+        id: 'm29',
+        fromMe: false,
+        text: 'We should definitely go.',
+        time: 'Yesterday',
+      },
+      {
+        id: 'm30',
+        fromMe: true,
+        text: 'I was thinking the same thing.',
+        time: 'Yesterday',
+      },
+      {
+        id: 'm31',
+        fromMe: false,
+        text: 'Did you manage to get tickets?',
+        time: 'Yesterday',
+      },
+      {
+        id: 'm32',
+        fromMe: true,
+        text: 'Got us tickets for Friday 🎶',
+        time: 'Yesterday',
+        reaction: '🔥',
+      },
+    ],
   },
 ]
 
@@ -285,12 +483,12 @@ export const currentUser = {
 
     interestedIn: 'Everyone',
     ageRange: '25 – 35',
-    maxDistance: '20',
+    maxDistance: 20,
     verifiedOnly: false,
 
     email: 'elena.kovalenko@example.com',
     phone: '+1 (555) 019-2834',
-    language: 'English'
+    language: 'English',
   }
 }
 

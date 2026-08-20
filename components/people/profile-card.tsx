@@ -3,7 +3,21 @@
 import { useState, useRef, useEffect } from 'react'
 import { MapPin, BadgeCheck } from 'lucide-react'
 import { type Person, currentUser } from '@/lib/data'
+import { MapPin, BadgeCheck, SlidersHorizontal } from 'lucide-react'
+import { FiltersModal } from './filters-modal'
+import { type Person } from '@/lib/data'
+import { useLikes } from '@/context/likes-context'
 import { cn } from '@/lib/utils'
+
+function useHydrated() {
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    setHydrated(true)
+  }, [])
+
+  return hydrated
+}
 
 export function ProfileCard({
   person,
@@ -142,6 +156,20 @@ export function ProfileCard({
           </span>
         ))}
 
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/10 to-transparent">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setFiltersOpen(true)
+            }}
+            className="absolute right-2 top-2 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-secondary"
+          >
+            <SlidersHorizontal className="size-4" />
+            Filters
+          </button>
+        </div>
+
         <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-background/85 px-2.5 py-1 text-xs font-semibold text-foreground">
           <MapPin className="size-3.5 text-primary" />
           {person.distance}
@@ -188,6 +216,8 @@ export function ProfileCard({
           </div>
         </div>
       </div>
+
+      <FiltersModal open={filtersOpen} onOpenChange={setFiltersOpen} />
 
       <style jsx>{`
         @keyframes tapHeartFade {
