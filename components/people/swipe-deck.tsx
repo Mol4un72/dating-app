@@ -6,6 +6,7 @@ import { ProfileCard } from '@/components/people/profile-card'
 import { FiltersModal } from '@/components/people/filters-modal'
 import { PillButton } from '@/components/pill-button'
 import { useFilters } from '@/context/filters-context'
+import { NotFound } from '../non-found'
 
 function isInAgeRange(age: number, ageRange: string) {
   switch (ageRange) {
@@ -110,17 +111,15 @@ export function SwipeDeck({ people }: { people: Person[] }) {
             />
           ))
         ) : (
-          <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-            <h2 className="text-xl font-semibold text-foreground">
-              No people match these filters
-            </h2>
-            <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-              Try broadening your age range, distance, or who you&apos;re interested in.
-            </p>
-            <PillButton className="mt-6" onClick={() => setFiltersOpen(true)}>
-              Adjust filters
-            </PillButton>
-          </div>
+          <NotFound
+            title="No matches found"
+            description="Try adjusting your filters to see more profiles."
+            action={
+              <PillButton onClick={() => setFiltersOpen(true)}>
+                Adjust Filters
+              </PillButton>
+            }
+          />
         )}
       </div>
 

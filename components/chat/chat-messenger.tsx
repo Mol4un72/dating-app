@@ -25,11 +25,24 @@ import { Avatar } from '@/components/avatar'
 import { conversations, type Message } from '@/lib/data'
 import { cn } from '@/lib/utils'
 import EmojiPicker from 'emoji-picker-react'
+import { NotFound } from '@/components/non-found'
+import { PillButton } from '@/components/pill-button'
 
 export function ChatMessenger({ activeId }: { activeId?: string }) {
   const active = activeId
-    ? conversations.find((c) => c.id === activeId) ?? conversations[0]
+    ? conversations.find((c) => c.id === activeId)
     : undefined
+
+  if (activeId && !active) {
+    return (
+      <NotFound
+        className="min-h-[calc(100svh-var(--nav-h,4rem))] lg:min-h-svh"
+        title="Conversation not found"
+        description="This conversation may have been removed or the link is no longer valid."
+        action={<PillButton href="/chat">Back to messages</PillButton>}
+      />
+    )
+  }
 
   return (
     <div className="flex h-[calc(100svh-var(--nav-h,4rem))] w-full lg:h-svh overflow-hidden">
