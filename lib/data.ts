@@ -2,6 +2,7 @@ export type Person = {
   id: number
   name: string
   age: number
+  gender?: 'Men' | 'Women' | string
   location: string
   distance: string
   bio: string
@@ -42,7 +43,7 @@ export interface SettingsState {
   // Preferences
   interestedIn: string
   ageRange: string
-  maxDistance: number
+  maxDistance: number | string
   verifiedOnly: boolean
 
   // Account
@@ -64,6 +65,7 @@ export const people: Person[] = [
     id: 0,
     name: 'Sophie',
     age: 26,
+    gender: 'Women',
     location: 'Brooklyn, NY',
     distance: '3 km away',
     bio: 'Coffee enthusiast, weekend hiker, and always looking for the next great book. Let’s trade playlists.',
@@ -76,6 +78,7 @@ export const people: Person[] = [
     id: 1,
     name: 'James',
     age: 31,
+    gender: 'Men',
     location: 'Manhattan, NY',
     distance: '5 km away',
     bio: 'Architect by day, home cook by night. I make an excellent negroni and a mean risotto.',
@@ -88,6 +91,7 @@ export const people: Person[] = [
     id: 2,
     name: 'Mia',
     age: 24,
+    gender: 'Women',
     location: 'Queens, NY',
     distance: '8 km away',
     bio: 'Artist and museum wanderer. Golden hour is my favorite time of day. Dogs over everything.',
@@ -100,6 +104,7 @@ export const people: Person[] = [
     id: 3,
     name: 'Liam',
     age: 29,
+    gender: 'Men',
     location: 'Jersey City, NJ',
     distance: '11 km away',
     bio: 'Music producer chasing good vibes and better tacos. Will absolutely bring you to a live show.',
@@ -112,6 +117,7 @@ export const people: Person[] = [
     id: 4,
     name: 'Ava',
     age: 28,
+    gender: 'Women',
     location: 'Hoboken, NJ',
     distance: '13 km away',
     bio: 'Product designer, plant collector, and part-time baker. Ask me about my sourdough starter.',
@@ -124,6 +130,7 @@ export const people: Person[] = [
     id: 5,
     name: 'Noah',
     age: 27,
+    gender: 'Men',
     location: 'Brooklyn, NY',
     distance: '4 km away',
     bio: 'Software engineer who’d rather be climbing. Weekends are for the mountains and slow mornings.',
@@ -271,7 +278,7 @@ export const currentUser = {
     appUpdates: false,
     emailAlerts: true,
 
-    profileVisibility: 'everyone',
+    profileVisibility: 'everyone' as const,
     showOnlineStatus: true,
     shareData: true,
     blockedUsers: ['spammer.joe@example.com', 'ex.partner@example.com'],

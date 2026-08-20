@@ -1,6 +1,7 @@
 'use client'
 
-import { useFilters } from '@/context/filters-context'
+import { useState, useEffect } from 'react'
+import { useFilters, defaultFilters } from '@/context/filters-context'
 import { Modal } from '@/components/modal'
 import { Tag } from '@/components/tag'
 import { PillButton } from '@/components/pill-button'
@@ -13,6 +14,21 @@ export function FiltersModal({
   onOpenChange: (open: boolean) => void
 }) {
   const { filters, setFilters } = useFilters()
+
+  // Local draft state for filters
+  const [draft, setDraft] = useState(filters)
+
+  // Sync draft whenever modal opens
+  useEffect(() => {
+    if (open) {
+      setDraft(filters)
+    }
+  }, [open, filters])
+
+  const handleApply = () => {
+    setFilters(draft)
+    onOpenChange(false)
+  }
 
   return (
     <Modal
@@ -37,9 +53,9 @@ export function FiltersModal({
             ].map((item) => (
               <Tag
                 key={item}
-                active={filters.interestedIn === item}
+                active={draft.interestedIn === item}
                 onClick={() =>
-                  setFilters((prev) => ({
+                  setDraft((prev) => ({
                     ...prev,
                     interestedIn: item,
                   }))
@@ -67,9 +83,9 @@ export function FiltersModal({
             ].map((item) => (
               <Tag
                 key={item}
-                active={filters.ageRange === item}
+                active={draft.ageRange === item}
                 onClick={() =>
-                  setFilters((prev) => ({
+                  setDraft((prev) => ({
                     ...prev,
                     ageRange: item,
                   }))
@@ -93,9 +109,9 @@ export function FiltersModal({
               type="range"
               min="0"
               max="51"
-              value={filters.distance}
+              value={draft.distance}
               onChange={(e) =>
-                setFilters((prev) => ({
+                setDraft((prev) => ({
                   ...prev,
                   distance: e.target.value,
                 }))
@@ -104,21 +120,23 @@ export function FiltersModal({
             />
 
             <div className="mt-3 text-center text-sm font-medium text-foreground">
-              {filters.distance === '51'
+              {draft.distance === '51'
                 ? 'Any distance'
-                : `${filters.distance} km`}
+                : `${draft.distance} km`}
             </div>
           </div>
         </div>
 
 
-        <PillButton
-          block
-          size="lg"
-          onClick={() => onOpenChange(false)}
-        >
-          Show people
-        </PillButton>
+        <div className="flex flex-col gap-2 mt-1">
+          <PillButton
+            block
+            size="lg"
+            onClick={handleApply}
+          >
+            Show people
+          </PillButton>
+        </div>
 
       </div>
     </Modal>

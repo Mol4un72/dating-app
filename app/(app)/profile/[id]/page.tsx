@@ -137,7 +137,7 @@ export default function UserProfilePage() {
     const currentBlockedUsers = readStoredBlockedUsers()
     const nextBlockedUsers = next
       ? [...new Set([...currentBlockedUsers, user.name])]
-      : currentBlockedUsers.filter((blockedUser) => blockedUser !== user.name)
+      : currentBlockedUsers.filter((blockedUser: string) => blockedUser !== user.name)
 
     persistBlockedUsers(nextBlockedUsers)
     setIsBlocked(next)
