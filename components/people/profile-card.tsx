@@ -1,22 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { MapPin, BadgeCheck } from 'lucide-react'
-import { currentUser } from '@/lib/data'
-import { SlidersHorizontal } from 'lucide-react'
-import { FiltersModal } from './filters-modal'
 import { type Person } from '@/lib/data'
+import { useLikes } from '@/context/likes-context'
 import { cn } from '@/lib/utils'
-
-function useHydrated() {
-  const [hydrated, setHydrated] = useState(false)
-
-  useEffect(() => {
-    setHydrated(true)
-  }, [])
-
-  return hydrated
-}
 
 export function ProfileCard({
   person,
@@ -27,8 +15,12 @@ export function ProfileCard({
 }) {
   const likeLock = useRef(false)
   const lastTap = useRef(0)
-
-  const [liked, setLiked] = useState(false)
+  const {
+    isLiked,
+    addLike: addLikedUser,
+    removeLike: removeLikedUser,
+  } = useLikes()
+  const liked = isLiked(person.id)
 
   const [tapHearts, setTapHearts] = useState<
     {
@@ -39,24 +31,13 @@ export function ProfileCard({
     }[]
   >([])
 
-  useEffect(() => {
-    setLiked(currentUser.likedUsers.includes(person.id))
-  }, [person.id])
-
   function addLike() {
-    if (!currentUser.likedUsers.includes(person.id)) {
-      currentUser.likedUsers.push(person.id)
-    }
-    setLiked(true)
+    addLikedUser(person.id)
   }
 
   function removeLike(e: React.MouseEvent) {
     e.stopPropagation()
-    const index = currentUser.likedUsers.indexOf(person.id)
-    if (index !== -1) {
-      currentUser.likedUsers.splice(index, 1)
-    }
-    setLiked(false)
+    removeLikedUser(person.id)
   }
 
   const like = ({
@@ -154,7 +135,7 @@ export function ProfileCard({
         </span>
       ))}
 
-      <span className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-background/85 px-2.5 py-1 text-xs font-semibold text-white/80">
+      <span className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-background/85 px-2.5 py-1 text-xs font-semibold text-foreground/80">
         <MapPin className="size-3.5 text-primary" />
         {person.distance}
       </span>
