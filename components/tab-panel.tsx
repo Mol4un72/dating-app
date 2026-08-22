@@ -12,7 +12,6 @@ export function TabPanel({
   settings,
   filters,
   setFilters,
-  onBlockUser,
   onToggle,
   onValueChange,
   blockedUsers,
@@ -28,7 +27,6 @@ export function TabPanel({
   onToggle: (key: keyof SettingsState) => void
   onValueChange: (key: keyof SettingsState, value: string | number | boolean) => void
   blockedUsers: string[]
-  onBlockUser: (e: React.FormEvent) => void
   onUnblockUser: (user: string) => void
   newBlockedUser: string
   setNewBlockedUser: (val: string) => void
@@ -209,7 +207,7 @@ export function TabPanel({
               
               
             <div>
-              <h3 className="text-sm-semibold text-foreground">
+              <h3 className="text-sm font-semibold text-foreground">
                 Distance
               </h3>
               
@@ -251,6 +249,22 @@ export function TabPanel({
           </div>
 
           <div className="flex flex-col gap-5">
+            {/* Theme Selection */}
+            <Field label="App Theme" htmlFor="account-theme">
+              <div className="flex flex-wrap gap-2">
+                {(['light', 'dark', 'system'] as const).map((theme) => (
+                  <Tag
+                    active={settings.theme === theme}
+                    key={theme}
+                    onClick={() => onValueChange('theme', theme)}
+                    className="cursor-pointer select-none w-fit"
+                  >
+                    {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                  </Tag>
+                ))}
+              </div>
+            </Field>
+
             {/* Email field */}
             <Field label="Email Address" htmlFor="account-email">
               <div className="relative">

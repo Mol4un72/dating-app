@@ -7,20 +7,25 @@ import { AppTopBar } from '@/components/app-topbar'
 import { Avatar } from '@/components/avatar'
 import { PillButton } from '@/components/pill-button'
 import { TabPanel } from '@/components/tab-panel'
-import { Field, Input, Select } from '@/components/field'
+import { Field, Input } from '@/components/field'
 import { cn } from '@/lib/utils'
 import { currentUser } from '@/lib/data'
 import type { SettingsState, PasswordState, TabType } from '@/lib/data'
 import { useRouter } from 'next/navigation'
 import { useFilters } from '@/context/filters-context'
+import { useTheme } from '@/context/theme-context'
 
 const STORAGE_KEY = 'lumi_settings'
 
 export default function SettingsPage() {
   const router = useRouter()
+  const { theme: activeTheme, setTheme: setActiveTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [selectedTab, setSelectedTab] = useState<TabType | null>(null)
-  const [settings, setSettings] = useState<SettingsState>(currentUser.Settings)
+  const [settings, setSettings] = useState<SettingsState>({
+    ...currentUser.Settings,
+    theme: activeTheme,
+  })
 
   const { filters, setFilters } = useFilters()
 
@@ -54,7 +59,11 @@ export default function SettingsPage() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY)
         if (saved) {
-          setSettings(JSON.parse(saved))
+          const parsed = JSON.parse(saved)
+          setSettings(parsed)
+          if (parsed.theme) {
+            setActiveTheme(parsed.theme)
+          }
         }
       } catch (e) {
         console.error('Failed to load settings', e)
@@ -62,7 +71,7 @@ export default function SettingsPage() {
     }, 0)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [setActiveTheme])
 
   // Save settings helper
   const saveSettings = (newSettings: SettingsState) => {
@@ -88,6 +97,9 @@ export default function SettingsPage() {
   // General field update handler
   const handleValueChange = (key: keyof SettingsState, value: string | number | boolean) => {
     const updated = { ...settings, [key]: value } as SettingsState
+    if (key === 'theme') {
+      setActiveTheme(value as 'light' | 'dark' | 'system')
+    }
     saveSettings(updated)
   }
 
@@ -275,7 +287,6 @@ export default function SettingsPage() {
                 onToggle={handleToggle}
                 onValueChange={handleValueChange}
                 blockedUsers={settings.blockedUsers}
-                onBlockUser={handleBlockUser}
                 onUnblockUser={handleUnblockUser}
                 newBlockedUser={newBlockedUser}
                 setNewBlockedUser={setNewBlockedUser}
@@ -359,7 +370,6 @@ export default function SettingsPage() {
                 onToggle={handleToggle}
                 onValueChange={handleValueChange}
                 blockedUsers={settings.blockedUsers}
-                onBlockUser={handleBlockUser}
                 onUnblockUser={handleUnblockUser}
                 newBlockedUser={newBlockedUser}
                 setNewBlockedUser={setNewBlockedUser}
