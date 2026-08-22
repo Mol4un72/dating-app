@@ -58,7 +58,13 @@ export function ChatMessenger({ activeId }: { activeId?: string }) {
         </div>
         <ul className="flex-1 overflow-y-auto p-2">
           {conversations.map((c) => (
-            <li key={c.id}>
+            <li 
+              key={c.id}
+              onClick={() => {
+                if (c.unread > 0) {
+                  c.unread = 0
+                }
+            }}>
               <Link
                 href={`/chat/${c.id}`}
                 className={cn(
