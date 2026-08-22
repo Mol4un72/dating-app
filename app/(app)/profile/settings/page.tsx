@@ -50,37 +50,21 @@ export default function SettingsPage() {
 
   // Check client-side mount & load settings
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true)
-      // Default to 'notifications' on desktop
-      if (window.innerWidth >= 1024) {
-        setSelectedTab('notifications')
+    setMounted(true)
+    // Default to 'notifications' on desktop only if no tab is currently selected
+    if (window.innerWidth >= 1024) {
+      setSelectedTab((prev) => prev ?? 'notifications')
+    }
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        setSettings(parsed)
       }
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY)
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          setSettings(parsed)
-          if (parsed.theme) {
-            setActiveTheme(parsed.theme)
-          }
-        }
-      } catch (e) {
-        console.error('Failed to load settings', e)
-      }
-    }, 0)
-
-    return () => clearTimeout(timer)
-  }, [setActiveTheme])
-
-  useEffect(() => {
-    if (!mounted) return
-    
-    document.documentElement.classList.toggle(
-      'dark',
-      settings.theme === 'dark'
-    )
-  }, [settings.theme, mounted])
+    } catch (e) {
+      console.error('Failed to load settings', e)
+    }
+  }, [])
 
   // Save settings helper
   const saveSettings = (newSettings: SettingsState) => {
