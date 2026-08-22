@@ -56,6 +56,17 @@ export function ChatMessenger({ activeId }: { activeId?: string }) {
         <div className="sticky top-0 z-10 border-b border-border bg-background/85 px-4 py-4 backdrop-blur-lg">
           <h1 className="text-xl font-bold tracking-tight text-foreground">Messages</h1>
         </div>
+        {conversations.length === 0 &&
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
+            <span className="grid size-16 place-items-center rounded-full bg-accent text-primary">
+              <MessageCircle className="size-8" />
+            </span>
+            <p className="text-lg font-semibold text-foreground">No messages yet</p>
+            <p className="max-w-xs text-sm text-muted-foreground">
+              You have not started any conversations yet. Start chatting with your matches!
+            </p>
+          </div>
+        }
         <ul className="flex-1 overflow-y-auto p-2">
           {conversations.map((c) => (
             <li 
