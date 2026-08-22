@@ -207,7 +207,7 @@ export function TabPanel({
               
               
             <div>
-              <h3 className="text-sm-semibold text-foreground">
+              <h3 className="text-sm font-semibold text-foreground">
                 Distance
               </h3>
               
@@ -252,7 +252,7 @@ export function TabPanel({
             {/* Theme Selection */}
             <Field label="App Theme" htmlFor="account-theme">
               <div className="flex flex-wrap gap-2">
-                {['light', 'dark'].map((theme) => (
+                {(['light', 'dark', 'system'] as const).map((theme) => (
                   <Tag
                     active={settings.theme === theme}
                     key={theme}

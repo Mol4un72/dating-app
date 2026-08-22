@@ -48,7 +48,7 @@ export interface SettingsState {
   verifiedOnly: boolean
 
   // Account
-  theme: 'light' | 'dark'
+  theme: 'light' | 'dark' | 'system'
   email: string
   phone: string
   language: string
