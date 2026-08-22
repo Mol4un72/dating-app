@@ -48,6 +48,7 @@ export interface SettingsState {
   verifiedOnly: boolean
 
   // Account
+  theme: 'light' | 'dark'
   email: string
   phone: string
   language: string
@@ -486,6 +487,7 @@ export const currentUser = {
     maxDistance: 20,
     verifiedOnly: false,
 
+    theme: 'light' as const,
     email: 'elena.kovalenko@example.com',
     phone: '+1 (555) 019-2834',
     language: 'English',

@@ -7,7 +7,7 @@ import { AppTopBar } from '@/components/app-topbar'
 import { Avatar } from '@/components/avatar'
 import { PillButton } from '@/components/pill-button'
 import { TabPanel } from '@/components/tab-panel'
-import { Field, Input, Select } from '@/components/field'
+import { Field, Input } from '@/components/field'
 import { cn } from '@/lib/utils'
 import { currentUser } from '@/lib/data'
 import type { SettingsState, PasswordState, TabType } from '@/lib/data'
@@ -63,6 +63,15 @@ export default function SettingsPage() {
 
     return () => clearTimeout(timer)
   }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    
+    document.documentElement.classList.toggle(
+      'dark',
+      settings.theme === 'dark'
+    )
+  }, [settings.theme, mounted])
 
   // Save settings helper
   const saveSettings = (newSettings: SettingsState) => {
@@ -275,7 +284,6 @@ export default function SettingsPage() {
                 onToggle={handleToggle}
                 onValueChange={handleValueChange}
                 blockedUsers={settings.blockedUsers}
-                onBlockUser={handleBlockUser}
                 onUnblockUser={handleUnblockUser}
                 newBlockedUser={newBlockedUser}
                 setNewBlockedUser={setNewBlockedUser}
@@ -359,7 +367,6 @@ export default function SettingsPage() {
                 onToggle={handleToggle}
                 onValueChange={handleValueChange}
                 blockedUsers={settings.blockedUsers}
-                onBlockUser={handleBlockUser}
                 onUnblockUser={handleUnblockUser}
                 newBlockedUser={newBlockedUser}
                 setNewBlockedUser={setNewBlockedUser}
