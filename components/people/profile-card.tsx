@@ -137,8 +137,8 @@ export function ProfileCard({
         className="size-full object-cover"
       />
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/10 to-transparent" />
-
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[oklch(0.21_0.02_15)]/85 via-[oklch(0.21_0.02_15)]/10 to-transparent" />
+    
       {tapHearts.map((heart) => (
         <span
           key={heart.id}
@@ -154,12 +154,12 @@ export function ProfileCard({
         </span>
       ))}
 
-      <span className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-background/85 px-2.5 py-1 text-xs font-semibold text-foreground">
+      <span className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-background/85 px-2.5 py-1 text-xs font-semibold text-white/80">
         <MapPin className="size-3.5 text-primary" />
         {person.distance}
       </span>
 
-      <div className="absolute inset-x-0 bottom-0 z-10 p-5 text-background">
+      <div className="absolute inset-x-0 bottom-0 z-10 p-5 text-white/80">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-bold">
             {person.name}, {person.age}
@@ -179,12 +179,12 @@ export function ProfileCard({
           )}
         </div>
 
-        <p className="mt-1 flex items-center gap-1 text-sm text-background/80">
+        <p className="mt-1 flex items-center gap-1 text-sm text-white/80">
           <MapPin className="size-3.5" />
           {person.location}
         </p>
 
-        <p className="mt-2 line-clamp-2 text-sm text-background/90">
+        <p className="mt-2 line-clamp-2 text-sm text-white/80">
           {person.bio}
         </p>
 
@@ -192,7 +192,7 @@ export function ProfileCard({
           {person.interests.slice(0, 3).map((interest) => (
             <span
               key={interest}
-              className="rounded-full bg-background/20 px-3 py-1 text-xs"
+              className="rounded-full bg-white/20 px-3 py-1 text-xs text-white/80"
             >
               {interest}
             </span>
