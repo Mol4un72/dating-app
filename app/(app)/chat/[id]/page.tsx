@@ -8,10 +8,11 @@ export default async function ConversationPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+  const conversationId = Number(id)
 
-  if (!conversations.some((conversation) => conversation.id === id)) {
+  if (!Number.isInteger(conversationId) || !conversations.some((conversation) => conversation.id === conversationId)) {
     notFound()
   }
 
-  return <ChatMessenger activeId={id} />
+  return <ChatMessenger activeId={conversationId} />
 }

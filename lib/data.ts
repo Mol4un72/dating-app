@@ -10,7 +10,6 @@ export type Person = {
   photo: string
   photos: string[]
   verified: boolean
-  sex: 'male' | 'female'
 }
 
 export type NotificationType =
@@ -65,7 +64,6 @@ export interface PasswordState {
 export const people: Person[] = [
   {
     id: 0,
-    sex: 'female',
     name: 'Sophie',
     age: 26,
     gender: 'Women',
@@ -79,7 +77,6 @@ export const people: Person[] = [
   },
   {
     id: 1,
-    sex: 'male',
     name: 'James',
     age: 31,
     gender: 'Men',
@@ -93,7 +90,6 @@ export const people: Person[] = [
   },
   {
     id: 2,
-    sex: 'female',
     name: 'Mia',
     age: 24,
     gender: 'Women',
@@ -107,7 +103,6 @@ export const people: Person[] = [
   },
   {
     id: 3,
-    sex: 'female',
     name: 'Ava',
     age: 28,
     gender: 'Women',
@@ -121,7 +116,6 @@ export const people: Person[] = [
   },
   {
     id: 4,
-    sex: 'male',
     name: 'Liam',
     age: 29,
     location: 'Jersey City, NJ',
@@ -134,7 +128,6 @@ export const people: Person[] = [
   },
   {
     id: 5,
-    sex: 'male',
     name: 'Noah',
     age: 27,
     gender: 'Men',
@@ -149,7 +142,7 @@ export const people: Person[] = [
 ]
 
 export type Conversation = {
-  id: string
+  id: number
   personId: number
   name: string
   photo: string
@@ -162,7 +155,7 @@ export type Conversation = {
 
 export const conversations: Conversation[] = [
   {
-    id: 'c1',
+    id: 1,
     personId: 0,
     name: 'Sophie',
     photo: '/people/sophie.png',
@@ -193,7 +186,7 @@ export const conversations: Conversation[] = [
   },
 
   {
-    id: 'c2',
+    id: 2,
     personId: 1,
     name: 'James',
     photo: '/people/james.png',
@@ -242,7 +235,7 @@ export const conversations: Conversation[] = [
   },
 
   {
-    id: 'c3',
+    id: 3,
     personId: 2,
     name: 'Mia',
     photo: '/people/mia.png',
@@ -292,7 +285,7 @@ export const conversations: Conversation[] = [
   },
 
   {
-    id: 'c4',
+    id: 4,
     personId: 3,
     name: 'Ava',
     photo: '/people/ava.png',
@@ -348,7 +341,7 @@ export const conversations: Conversation[] = [
   },
 
   {
-    id: 'c5',
+    id: 5,
     personId: 4,
     name: 'Liam',
     photo: '/people/liam.png',
