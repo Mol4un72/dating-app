@@ -115,6 +115,7 @@ export function ChatMessenger({ activeId }: { activeId?: number }) {
       <div className={cn('flex min-h-0 flex-1 flex-col', !activeId && 'hidden lg:flex')}>
         {active ? (
           <Conversation
+            key={active.id}
             name={active.name}
             photo={active.photo}
             online={active.online}
