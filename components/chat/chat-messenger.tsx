@@ -28,7 +28,7 @@ import EmojiPicker from 'emoji-picker-react'
 import { NotFound } from '@/components/non-found'
 import { PillButton } from '@/components/pill-button'
 
-export function ChatMessenger({ activeId }: { activeId?: string }) {
+export function ChatMessenger({ activeId }: { activeId?: number }) {
   const active = activeId
     ? conversations.find((c) => c.id === activeId)
     : undefined
