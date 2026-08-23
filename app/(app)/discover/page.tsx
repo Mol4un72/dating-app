@@ -34,7 +34,7 @@ export default function DiscoverPage() {
       // 3. Distance filter
       if (filters.distance && filters.distance !== '51') {
         const maxDist = parseInt(filters.distance, 10)
-        const personDist = parseInt(person.distance, 10)
+        const personDist = person.distance
         if (!isNaN(maxDist) && !isNaN(personDist) && personDist > maxDist) {
           return false
         }
