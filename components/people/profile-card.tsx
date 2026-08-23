@@ -137,7 +137,7 @@ export function ProfileCard({
 
       <span className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-background/85 px-2.5 py-1 text-xs font-semibold text-foreground/80">
         <MapPin className="size-3.5 text-primary" />
-        {person.distance}
+        {person.distance} km away
       </span>
 
       <div className="absolute inset-x-0 bottom-0 z-10 p-5 text-white/80">

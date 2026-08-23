@@ -4,7 +4,7 @@ export type Person = {
   age: number
   gender?: 'Men' | 'Women' | string
   location: string
-  distance: string
+  distance: number
   bio: string
   interests: string[]
   photo: string
@@ -68,7 +68,7 @@ export const people: Person[] = [
     age: 26,
     gender: 'Women',
     location: 'Brooklyn, NY',
-    distance: '3 km away',
+    distance: 3,
     bio: 'Coffee enthusiast, weekend hiker, and always looking for the next great book. Let’s trade playlists.',
     interests: ['Hiking', 'Coffee', 'Reading', 'Photography', 'Travel'],
     photo: '/people/sophie.png',
@@ -81,7 +81,7 @@ export const people: Person[] = [
     age: 31,
     gender: 'Men',
     location: 'Manhattan, NY',
-    distance: '5 km away',
+    distance: 5,
     bio: 'Architect by day, home cook by night. I make an excellent negroni and a mean risotto.',
     interests: ['Cooking', 'Design', 'Wine', 'Cycling', 'Jazz'],
     photo: '/people/james.png',
@@ -94,7 +94,7 @@ export const people: Person[] = [
     age: 24,
     gender: 'Women',
     location: 'Queens, NY',
-    distance: '8 km away',
+    distance: 8,
     bio: 'Artist and museum wanderer. Golden hour is my favorite time of day. Dogs over everything.',
     interests: ['Art', 'Museums', 'Dogs', 'Yoga', 'Film'],
     photo: '/people/mia.png',
@@ -107,7 +107,7 @@ export const people: Person[] = [
     age: 28,
     gender: 'Women',
     location: 'Hoboken, NJ',
-    distance: '13 km away',
+    distance: 13,
     bio: 'Product designer, plant collector, and part-time baker. Ask me about my sourdough starter.',
     interests: ['Baking', 'Plants', 'Design', 'Running', 'Podcasts'],
     photo: '/people/ava.png',
@@ -119,7 +119,7 @@ export const people: Person[] = [
     name: 'Liam',
     age: 29,
     location: 'Jersey City, NJ',
-    distance: '11 km away',
+    distance: 11,
     bio: 'Music producer chasing good vibes and better tacos. Will absolutely bring you to a live show.',
     interests: ['Music', 'Concerts', 'Food', 'Skating', 'Vinyl'],
     photo: '/people/liam.png',
@@ -132,7 +132,7 @@ export const people: Person[] = [
     age: 27,
     gender: 'Men',
     location: 'Brooklyn, NY',
-    distance: '4 km away',
+    distance: 4,
     bio: 'Software engineer who’d rather be climbing. Weekends are for the mountains and slow mornings.',
     interests: ['Climbing', 'Coffee', 'Tech', 'Travel', 'Camping'],
     photo: '/people/noah.png',
