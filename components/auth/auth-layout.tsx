@@ -27,10 +27,10 @@ export function AuthLayout({
           alt=""
           className="absolute inset-0 size-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-foreground/10 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-12">
           {aside ?? (
-            <blockquote className="max-w-md text-balance text-2xl font-semibold leading-snug text-background">
+            <blockquote className="max-w-md text-balance text-2xl font-semibold leading-snug text-white">
               “We matched on a Tuesday and haven’t stopped talking since.”
             </blockquote>
           )}
