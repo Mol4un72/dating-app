@@ -27,8 +27,7 @@ export default function LoginPage() {
     resolver: zodResolver(schema)
   })
 
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  function onSubmit(data: FormData) {
     router.push('/discover')
   }
 
@@ -38,7 +37,7 @@ export default function LoginPage() {
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome back</h1>
         <p className="mt-2 text-muted-foreground">Log in to keep the conversation going.</p>
 
-        <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 flex flex-col gap-4">
           <Field label="Email" htmlFor="email">
             <Input id="email" type="email" placeholder="you@example.com" {...register('email')} />
           </Field>
