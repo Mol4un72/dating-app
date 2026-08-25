@@ -6,9 +6,26 @@ import { AuthLayout } from '@/components/auth/auth-layout'
 import { SocialButtons } from '@/components/auth/social-buttons'
 import { Field, Input } from '@/components/field'
 import { PillButton } from '@/components/pill-button'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 export default function LoginPage() {
   const router = useRouter()
+
+  const schema = z.object({
+    email: z.email(''),
+    password: z.string().min(8, ''),
+  })
+
+  type FormData = z.infer<typeof schema>
+
+  const {
+    register,
+    handleSubmit
+  } = useForm<FormData>({
+    resolver: zodResolver(schema)
+  })
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -23,7 +40,7 @@ export default function LoginPage() {
 
         <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-4">
           <Field label="Email" htmlFor="email">
-            <Input id="email" type="email" placeholder="you@example.com" required />
+            <Input id="email" type="email" placeholder="you@example.com" {...register('email')} />
           </Field>
           <Field
             label="Password"
@@ -34,7 +51,7 @@ export default function LoginPage() {
               </Link>
             }
           >
-            <Input id="password" type="password" placeholder="••••••••" required />
+            <Input id="password" type="password" placeholder="••••••••" {...register('password')} />
           </Field>
           <PillButton type="submit" size="lg" block className="mt-2">
             Log in
