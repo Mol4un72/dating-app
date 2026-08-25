@@ -9,7 +9,7 @@ export function AuthLayout({
   aside?: React.ReactNode
 }) {
   return (
-    <div className="flex min-h-svh bg-background">
+    <div className="flex h-svh bg-background overflow-hidden">
       {/* Form column */}
       <div className="flex w-full flex-col px-5 py-6 lg:w-[52%] lg:px-16">
         <Link href="/" aria-label="Lumi home" className="inline-flex">
