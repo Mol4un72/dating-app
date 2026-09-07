@@ -79,15 +79,22 @@ export function NotificationsButton() {
     (item) => item.unread
   )
 
-  function toggleNotifications() {
-    setOpen((prev) => !prev)
+  async function toggleNotifications() {
+    const nextOpen = !open
+    setOpen(nextOpen)
+
+    if (!nextOpen) return
 
     setNotifications((prev) =>
       prev.map((item) => ({
         ...item,
         unread: false,
-      }))
+      })),
     )
+
+    await fetch('/api/me/notifications/read-all', {
+      method: 'POST',
+    })
   }
 
   return (
@@ -127,7 +134,7 @@ export function NotificationsButton() {
             </button>
           </div>
 
-          <div className="max-h-[calc(100vh-8rem)] overflow-y-auto p-2 sm:max-h-96 sm:p-3">
+          <div className="max-h-[calc(100vh-8rem)] overflow-y-auto p-2 sm:max-h-96 ">
             {notifications.map((item) => {
               const config =
                 notificationTypes[item.type as keyof typeof notificationTypes]
@@ -139,7 +146,7 @@ export function NotificationsButton() {
                   key={item.id}
                   type="button"
                   className={`
-                    flex w-full gap-3 rounded-xl p-3 text-left transition hover:bg-secondary
+                    flex w-full gap-3 rounded-xl p-3 text-left transition hover:bg-secondary mt-2
                     ${item.unread ? 'bg-secondary/50' : ''}
                   `}
                 >
