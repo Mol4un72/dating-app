@@ -8,23 +8,23 @@ import { Tag, VerifiedBadge } from '@/components/tag'
 import { PillButton } from '@/components/pill-button'
 import { Modal } from '@/components/modal'
 import { Field, Input } from '@/components/field'
-import { currentUser, Interests } from '@/lib/data'
+import type { Me, Draft } from "@/types/me"
+import { Interests } from '@/types/interests'
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useFilters } from '@/context/filters-context'
 
-  type ModalType =
-  | 'edit'
-  | 'interests'
-  | 'preferences'
-  | 'photos'
-  | null
-
-  type ErrorType = {
-    interests: boolean
-    photos: boolean
-  }
+type ModalType =
+| 'edit'
+| 'interests'
+| 'preferences'
+| 'photos'
+| null
+type ErrorType = {
+  interests: boolean
+  photos: boolean
+}
 
 export default function ProfilePage() {
 
@@ -37,32 +37,27 @@ export default function ProfilePage() {
     photos: false,
   })
 
-  const [profile, setProfile] = useState(currentUser)
+  const [profile, setProfile] = useState<Me | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const [draft, setDraft] = useState({
-    ...currentUser,
-    filters,
-  })
+  const [draft, setDraft] = useState<Draft | null>(null)
 
   const photoInputRef = useRef<HTMLInputElement | null>(null)
 
   const schema = z.object({
     name: z.string().min(2, 'Minimum 2 symbols'),
-
     location: z.string().min(4, 'Minimum 4 symbols'),
-
     bio: z
       .string()
       .min(20, 'Minimum 20 symbols')
   })
 
-
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: profile.name,
-      location: profile.location,
-      bio: profile.bio,
+      name: '',
+      location: '',
+      bio: '',
     },
   })
 
@@ -73,17 +68,77 @@ export default function ProfilePage() {
     formState:{errors}
   }=form
 
-  const onSubmit = (data: z.infer<typeof schema>) => {
-    setProfile((prev) => ({
-      ...prev,
-      ...data,
-    }))
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const response = await fetch('/api/me')
+      
+        if (!response.ok) {
+          throw new Error(`Failed to load profile: ${response.status}`)
+        }
+      
+        const data: Me = await response.json()
+
+        console.log('PROFILE FROM API:', data)
+
+        setProfile(data)
+
+        reset({
+          name: data.name ?? '',
+          location: data.location ?? '',
+          bio: data.bio ?? '',
+        })
+
+        reset({
+          name: data.name ?? '',
+          location: data.location ?? '',
+          bio: data.bio ?? '',
+        })
+      } catch (error) {
+        console.error('PROFILE LOAD ERROR:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
   
-    setOpenModal(null)
+    loadProfile()
+  }, [reset])
+
+  const onSubmit = async (
+    data: z.infer<typeof schema>
+  ) => {
+    try {
+      const response = await fetch('/api/me', {
+        method: 'PATCH',
+
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile')
+      }
+
+      const updatedProfile: Me =
+        await response.json()
+
+      setProfile(updatedProfile)
+
+      setOpenModal(null)
+    } catch (error) {
+      console.error(
+        'PROFILE UPDATE ERROR:',
+        error
+      )
+    }
   }
 
   function toggleInterest(interest: string) {
     setDraft((prev) => {
+      if (!prev) return prev
       const isSelected = prev.interests.includes(interest)
 
       if (isSelected && prev.interests.length === 1) {
@@ -109,67 +164,164 @@ export default function ProfilePage() {
     })
   }
 
-  function removePhoto(index: number) {
-    setDraft((prev) => {
-      if (prev.photos.length === 1) {
-        setError((e) => ({
-          ...e,
-          photos: true,
-        }))
+  async function removePhoto(index: number) {
+    if (!draft) return
 
-        return prev
+    if (draft.photos.length === 1) {
+      setError((e) => ({
+        ...e,
+        photos: true,
+      }))
+
+      return
+    }
+
+    const photo = draft.photos[index]
+
+    if (!photo) return
+
+    try {
+      const response = await fetch(
+        '/api/me/photos',
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: photo.id,
+          }),
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || 'Failed to delete photo'
+        )
       }
+
+      setDraft((prev) => {
+        if (!prev) return prev
+
+        return {
+          ...prev,
+          photos: prev.photos.filter(
+            (_, i) => i !== index
+          ),
+        }
+      })
 
       setError((e) => ({
         ...e,
         photos: false,
       }))
+    } catch (error) {
+      console.error(
+        'PHOTO DELETE ERROR:',
+        error
+      )
+    }
+  }
 
-      return {
-        ...prev,
-        photos: prev.photos.filter((_, i) => i !== index),
+  async function addPhoto(file: File) {
+    try {
+      const formData = new FormData()
+
+      formData.append('file', file)
+
+      const response = await fetch(
+        '/api/me/photos',
+        {
+          method: 'POST',
+          body: formData,
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || 'Failed to upload photo'
+        )
       }
-    })
+
+      setDraft((prev) => {
+        if (!prev) return prev
+
+        return {
+          ...prev,
+
+          photos: [
+            ...prev.photos,
+            {
+              id: data.id,
+              url: data.url,
+            },
+          ],
+        }
+      })
+    } catch (error) {
+      console.error(
+        'PHOTO UPLOAD ERROR:',
+        error
+      )
+    }
   }
 
-  function addPhoto(file: File) {
-    if (!file.type.startsWith("image/")) return
-
-    const url = URL.createObjectURL(file)
-
-    setDraft((prev) => ({
-      ...prev,
-      photos: [...prev.photos, url],
-    }))
-  }
-
-  function handlePhotoUpload(
+  async function handlePhotoUpload(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
     const file = e.target.files?.[0]
 
     if (!file) return
 
-    if (!file.type.startsWith("image/")) {
-      alert("Please select an image")
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image')
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("Max size 5MB")
+      alert('Max size 5MB')
       return
     }
 
-    if (draft.photos.length >= 3) {
-      alert("Maximum 3 photos")
+    if (currentDraft.photos.length >= 3) {
+      alert('Maximum 3 photos')
       return
     }
 
-    addPhoto(file)
+    await addPhoto(file)
 
-    e.target.value = ""
+    e.target.value = ''
   }
-  
+
+  if (loading) {
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        Loading...
+      </div>
+    )
+  }
+
+  if (!profile) {
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        Failed to load profile.
+      </div>
+    )
+  }
+
+  const currentDraft: Draft = draft ?? {
+   ...profile,
+   filters: {
+     interestedIn: filters?.interestedIn ?? 'Everyone',
+     ageRange: filters?.ageRange ?? '18 – 25',
+     distance: filters?.distance ?? '51',
+   },
+  }
+
   return (
     <>
       <AppTopBar
@@ -181,24 +333,20 @@ export default function ProfilePage() {
           {/* Left: identity + info */}
           <div className="flex flex-col gap-6">
             <section className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-sm">
-              <Avatar src={profile.photo} alt={profile.name} size="xl" ring />
+              <Avatar  src={profile.photos[0]?.url ?? '/placeholder.svg'}  alt={profile.name ?? 'Profile'}  size="xl"  ring/>
               <div className="mt-4 flex items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                  {profile.name}, {profile.age}
-                </h1>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">  {profile.name ?? 'Your name'}  {profile.age !== null ? `, ${profile.age}` : ''}</h1>
                 {profile.verified && <VerifiedBadge />}
               </div>
-              <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="size-4" /> {profile.location}
-              </p>
+              <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">  <MapPin className="size-4" />  {profile.location ?? 'Location not set'}</p>
               <div className="mt-5 flex w-full gap-2">
                 <PillButton 
                   block 
                   onClick={() => {
                     reset({
-                      name: profile.name,
-                      location: profile.location,
-                      bio: profile.bio,
+                      name: profile.name ?? '',
+                      location: profile.location ?? '',
+                      bio: profile.bio ?? '',
                     })
                     setOpenModal('edit')
                   }}>
@@ -290,8 +438,8 @@ export default function ProfilePage() {
                 <div className="mt-4 grid grid-cols-3 gap-3">
                   {profile.photos.map((photo, i) => (
                     <img
-                      key={i}
-                      src={photo || '/placeholder.svg'}
+                      key={photo.id}
+                      src={photo.url || '/placeholder.svg'}
                       alt={`Photo ${i + 1}`}
                       className="aspect-[3/4] w-full rounded-2xl object-cover"
                     />
@@ -381,7 +529,7 @@ export default function ProfilePage() {
           {Interests.map((interest) => (
             <Tag
               key={interest}
-              active={draft.interests.includes(interest)}
+              active={currentDraft.interests.includes(interest)}
               onClick={() => toggleInterest(interest)}
             >
               {interest}
@@ -394,23 +542,52 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
-        <PillButton 
-            type="submit"
-            block size="lg"
-            className="mt-5"
-            onClick={() => {
-              setProfile(draft)
-
+        <PillButton
+          type="button"
+          block
+          size="lg"
+          className="mt-5"
+          onClick={async () => {
+            try {
+              const response = await fetch('/api/me', {
+                method: 'PATCH',
+              
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              
+                body: JSON.stringify({
+                  interests: currentDraft.interests,
+                }),
+              })
+            
+              if (!response.ok) {
+                throw new Error(
+                  'Failed to save interests'
+                )
+              }
+            
+              const updatedProfile: Me =
+                await response.json()
+            
+              setProfile(updatedProfile)
+            
               setError((prev) => ({
                 ...prev,
-                interests: false
+                interests: false,
               }))
             
               setOpenModal(null)
-            }}
-          >
-            Save changes
-          </PillButton>
+            } catch (error) {
+              console.error(
+                'INTERESTS SAVE ERROR:',
+                error
+              )
+            }
+          }}
+        >
+          Save changes
+        </PillButton>
       </Modal>
 
       <Modal
@@ -432,15 +609,19 @@ export default function ProfilePage() {
               {['Men', 'Women', 'Everyone'].map((item) => (
                 <Tag
                   key={item}
-                  active={draft.filters.interestedIn === item}
+                  active={currentDraft.filters.interestedIn === item}
                   onClick={() =>
-                    setDraft((prev) => ({
-                      ...prev,
-                      filters: {
-                        ...prev.filters,
-                        interestedIn: item,
-                      },
-                    }))
+                    setDraft((prev) => {
+                      if (!prev) return prev
+                                        
+                      return {
+                        ...prev,
+                        filters: {
+                          ...prev.filters,
+                          interestedIn: item,
+                        },
+                      }
+                    })
                   }
                 >
                   {item}
@@ -463,15 +644,19 @@ export default function ProfilePage() {
               ].map((item) => (
                 <Tag
                   key={item}
-                  active={draft.filters.ageRange === item}
+                  active={currentDraft.filters.ageRange === item}
                   onClick={() =>
-                    setDraft((prev) => ({
-                      ...prev,
-                      filters: {
-                        ...prev.filters,
-                        ageRange: item,
-                      },
-                    }))
+                    setDraft((prev) => {
+                      if (!prev) return prev
+                                        
+                      return {
+                        ...prev,
+                        filters: {
+                          ...prev.filters,
+                          ageRange: item,
+                        },
+                      }
+                    })
                   }
                 >
                   {item}
@@ -490,23 +675,27 @@ export default function ProfilePage() {
                 type="range"
                 min="0"
                 max="51"
-                value={draft.filters.distance}
+                value={currentDraft.filters.distance}
                 onChange={(e) =>
-                  setDraft((prev) => ({
-                    ...prev,
-                    filters: {
-                      ...prev.filters,
-                      distance: e.target.value,
-                    },
-                  }))
+                  setDraft((prev) => {
+                    if (!prev) return prev
+                  
+                    return {
+                      ...prev,
+                      filters: {
+                        ...prev.filters,
+                        distance: e.target.value,
+                      },
+                    }
+                  })
                 }
                 className="w-full"
               />
 
               <div className="mt-3 text-center text-sm font-medium text-foreground">
-                {draft.filters.distance === '51'
+                {currentDraft.filters.distance === '51'
                   ? 'Any distance'
-                  : `${draft.filters.distance} km`}
+                  : `${currentDraft.filters.distance} km`}
               </div>
             </div>
           </div>
@@ -514,12 +703,44 @@ export default function ProfilePage() {
         </div>
                 
         <PillButton
+          type="button"
           block
           size="lg"
           className="mt-5"
-          onClick={() => {
-            setFilters(draft.filters)
-            setOpenModal(null)
+          onClick={async () => {
+            try {
+              const response = await fetch('/api/me', {
+                method: 'PATCH',
+              
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              
+                body: JSON.stringify({
+                  filters: currentDraft.filters,
+                }),
+              })
+            
+              if (!response.ok) {
+                throw new Error(
+                  'Failed to save preferences'
+                )
+              }
+            
+              const updatedProfile: Me =
+                await response.json()
+            
+              setProfile(updatedProfile)
+            
+              setFilters(currentDraft.filters)
+            
+              setOpenModal(null)
+            } catch (error) {
+              console.error(
+                'PREFERENCES SAVE ERROR:',
+                error
+              )
+            }
           }}
         >
           Save changes
@@ -551,15 +772,16 @@ export default function ProfilePage() {
             type="file"
             accept="image/*"
             hidden
+            onChange={handlePhotoUpload}
           />
           <div className="grid grid-cols-3 gap-3">
-            {draft.photos.map((photo, index) => (
+            {currentDraft.photos.map((photo, index) => (
               <div
-                key={index}
+                key={photo.id}
                 className="group relative aspect-[3/4] overflow-hidden rounded-2xl"
               >
                 <img
-                  src={photo}
+                  src={photo.url}
                   alt={`Photo ${index + 1}`}
                   className="h-full w-full object-cover"
                 />
@@ -574,7 +796,7 @@ export default function ProfilePage() {
               </div>
             ))}
 
-            {draft.photos.length < 3 && (
+            {currentDraft.photos.length < 3 && (
               <button
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
@@ -595,7 +817,7 @@ export default function ProfilePage() {
             block
             size="lg"
             onClick={() => {
-              setProfile(draft)
+              setProfile(currentDraft)
                       
               setError((prev) => ({
                 ...prev,

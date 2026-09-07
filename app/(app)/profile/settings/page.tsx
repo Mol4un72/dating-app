@@ -1,7 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, Shield, Heart, LogOut, ChevronRight, MapPin, User, Trash2, Check, X, ArrowLeft, Info } from 'lucide-react'
+import {
+  Bell,
+  Shield,
+  Heart,
+  LogOut,
+  ChevronRight,
+  MapPin,
+  User,
+  Trash2,
+  Check,
+  X,
+  ArrowLeft,
+  Info,
+} from 'lucide-react'
+
 import { VerifiedBadge } from '@/components/tag'
 import { AppTopBar } from '@/components/app-topbar'
 import { Avatar } from '@/components/avatar'
@@ -9,26 +23,44 @@ import { PillButton } from '@/components/pill-button'
 import { TabPanel } from '@/components/tab-panel'
 import { Field, Input } from '@/components/field'
 import { cn } from '@/lib/utils'
-import { currentUser } from '@/lib/data'
-import type { SettingsState, PasswordState, TabType } from '@/lib/data'
+import type { SettingsState } from '@/types/settings'
+import type { PasswordState } from '@/types/password'
+import type { TabType } from '@/types/tab'
 import { useRouter } from 'next/navigation'
 import { useFilters } from '@/context/filters-context'
 import { useTheme } from '@/context/theme-context'
-
-const STORAGE_KEY = 'lumi_settings'
+import { signOut } from 'next-auth/react'
+import { useCurrentUser } from '@/context/user-context'
 
 export default function SettingsPage() {
+  const { user, isLoading } = useCurrentUser()
   const router = useRouter()
   const { theme: activeTheme, setTheme: setActiveTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [selectedTab, setSelectedTab] = useState<TabType | null>(null)
   const [settings, setSettings] = useState<SettingsState>({
-    ...currentUser.Settings,
+    newMatches: true,
+    newMessages: true,
+    appUpdates: false,
+    emailAlerts: true,
+
+    profileVisibility: 'everyone',
+    showOnlineStatus: true,
+    shareData: true,
+    blockedUsers: [],
+
+    interestedIn: 'Everyone',
+    ageRange: '25 – 35',
+    maxDistance: 20,
+    verifiedOnly: false,
+
     theme: activeTheme,
+    email: '',
+    phone: '',
+    language: 'English',
   })
-
   const { filters, setFilters } = useFilters()
-
+  
   // Modal states
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -48,31 +80,106 @@ export default function SettingsPage() {
   // Blocked user input state
   const [newBlockedUser, setNewBlockedUser] = useState('')
 
-  // Check client-side mount & load settings
-  useEffect(() => {
+   useEffect(() => {
     setMounted(true)
-    // Default to 'notifications' on desktop only if no tab is currently selected
+
     if (window.innerWidth >= 1024) {
       setSelectedTab((prev) => prev ?? 'notifications')
     }
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        setSettings(parsed)
+
+    async function loadSettings() {
+      try {
+        const response = await fetch('/api/me/settings', {
+          method: 'GET',
+          cache: 'no-store',
+        })
+
+        if (!response.ok) {
+          throw new Error(`Settings API: ${response.status}`)
+        }
+
+        const data = await response.json()
+
+        setSettings((prev) => ({
+          ...prev,
+          ...data,
+          email: user?.email ?? prev.email,
+          phone: user?.phone ?? prev.phone,
+          language: user?.language ?? prev.language,
+        }))
+      } catch (error) {
+        console.error('Failed to load settings:', error)
       }
-    } catch (e) {
-      console.error('Failed to load settings', e)
     }
-  }, [])
+
+    loadSettings()
+  }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    
+    setSettings(prev => ({
+      ...prev,
+    
+      interestedIn: user.settings?.interestedIn ?? prev.interestedIn,
+      ageRange: user.settings?.ageRange ?? prev.ageRange,
+      maxDistance: user.settings?.maxDistance ?? prev.maxDistance,
+      verifiedOnly: user.settings?.verifiedOnly ?? prev.verifiedOnly,
+      theme: (user.settings?.theme as 'light' | 'dark' | 'system') ?? activeTheme,
+    
+      email: user.email,
+      phone: user.phone ?? '',
+      language: user.language,
+    }))
+  }, [user, activeTheme])
 
   // Save settings helper
-  const saveSettings = (newSettings: SettingsState) => {
+  const saveSettings = async (newSettings: SettingsState) => {
     setSettings(newSettings)
+
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings))
-    } catch (e) {
-      console.error('Failed to save settings', e)
+      const response = await fetch('/api/me/settings', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          newMatches: newSettings.newMatches,
+          newMessages: newSettings.newMessages,
+          appUpdates: newSettings.appUpdates,
+          emailAlerts: newSettings.emailAlerts,
+          profileVisibility: newSettings.profileVisibility,
+          showOnlineStatus: newSettings.showOnlineStatus,
+          shareData: newSettings.shareData,
+          interestedIn: newSettings.interestedIn,
+          ageRange: newSettings.ageRange,
+          maxDistance: newSettings.maxDistance,
+          verifiedOnly: newSettings.verifiedOnly,
+          theme: newSettings.theme,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null)
+
+        throw new Error(
+          data?.error ?? `Settings API: ${response.status}`,
+        )
+      }
+
+      const savedSettings = await response.json()
+
+      setSettings((prev) => ({
+        ...prev,
+        ...savedSettings,
+      }))
+    } catch (error) {
+      console.error('Failed to save settings:', error)
+
+      showToast(
+        'Failed to save settings',
+        'error',
+      )
     }
   }
 
@@ -159,14 +266,15 @@ export default function SettingsPage() {
       setIsDeleting(false)
       setShowDeleteModal(false)
       showToast('Account deleted successfully')
-      localStorage.removeItem(STORAGE_KEY)
       router.push('/register')
     }, 2000)
   }
 
   // Logout handler
-  const handleLogout = () => {
-    router.push('/login')
+  const handleLogout = async () => {
+    await signOut({
+      callbackUrl: '/login',
+    })
   }
 
   if (!mounted) {
@@ -219,15 +327,25 @@ export default function SettingsPage() {
             <div className="flex flex-col gap-6">
               {/* Profile Card */}
               <section className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-sm">
-                <Avatar src={currentUser.photo} alt={currentUser.name} size="xl" ring />
+                <Avatar
+                  src={user?.photos?.[0]?.url}
+                  alt={user?.name ?? 'User'}
+                  size="xl"
+                  ring
+                />
+                          
                 <div className="mt-4 flex items-center gap-2">
                   <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                    {currentUser.name}, {currentUser.age}
+                    {user?.name ?? 'User'}
+                    {user?.age ? `, ${user.age}` : ''}
                   </h1>
-                  {currentUser.verified && <VerifiedBadge />}
+                          
+                  {user?.verified && <VerifiedBadge />}
                 </div>
+                          
                 <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="size-4" /> {currentUser.location}
+                  <MapPin className="size-4" />
+                  {user?.location ?? 'Location not set'}
                 </p>
               </section>
 
@@ -296,15 +414,15 @@ export default function SettingsPage() {
           {/* Left Column: Profile Card & Sidebar Menu */}
           <div className="flex flex-col gap-6">
             <section className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-sm">
-              <Avatar src={currentUser.photo} alt={currentUser.name} size="xl" ring />
+              <Avatar src={user?.photos?.[0].url} alt={user?.name ?? 'User'} size="xl" ring />
               <div className="mt-4 flex items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                  {currentUser.name}, {currentUser.age}
+                  {user?.name}, {user?.age}
                 </h1>
-                {currentUser.verified && <VerifiedBadge />}
+                {user?.verified && <VerifiedBadge />}
               </div>
               <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="size-4" /> {currentUser.location}
+                <MapPin className="size-4" /> {user?.location}
               </p>
             </section>
 
