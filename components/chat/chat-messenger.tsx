@@ -22,16 +22,67 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar } from '@/components/avatar'
-import { conversations, type Message } from '@/lib/data'
 import { cn } from '@/lib/utils'
 import EmojiPicker from 'emoji-picker-react'
 import { NotFound } from '@/components/non-found'
 import { PillButton } from '@/components/pill-button'
 
-export function ChatMessenger({ activeId }: { activeId?: number }) {
+type Conversation = {
+  id: string
+  personId: string
+  name: string
+  photo: string
+  online: boolean
+  lastMessage: string
+  time: string
+  unread: number
+}
+
+type ChatMessage = {
+  id: string
+  fromMe: boolean
+  text?: string
+  image?: string
+  time: string
+  reaction?: string
+}
+
+export function ChatMessenger({ activeId }: { activeId?: string }) {
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
   const active = activeId
     ? conversations.find((c) => c.id === activeId)
     : undefined
+
+  useEffect(() => {
+    async function loadConversations() {
+      try {
+        const response = await fetch('/api/conversations')
+
+        if (!response.ok) {
+          throw new Error('Failed to load conversations')
+        }
+
+        const data = await response.json()
+        setConversations(data)
+      } catch (error) {
+        console.error('Failed to load conversations:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadConversations()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[calc(100svh-var(--nav-h,4rem))] w-full items-center justify-center lg:h-svh">
+        <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
 
   if (activeId && !active) {
     return (
@@ -71,11 +122,7 @@ export function ChatMessenger({ activeId }: { activeId?: number }) {
           {conversations.map((c) => (
             <li 
               key={c.id}
-              onClick={() => {
-                if (c.unread > 0) {
-                  c.unread = 0
-                }
-            }}>
+            >
               <Link
                 href={`/chat/${c.id}`}
                 className={cn(
@@ -116,11 +163,11 @@ export function ChatMessenger({ activeId }: { activeId?: number }) {
         {active ? (
           <Conversation
             key={active.id}
+            conversationId={active.id}
             name={active.name}
             photo={active.photo}
             online={active.online}
             personId={active.personId}
-            messages={active.messages}
           />
         ) : (
           <div className="hidden flex-1 flex-col items-center justify-center gap-3 p-8 text-center lg:flex">
@@ -139,19 +186,19 @@ export function ChatMessenger({ activeId }: { activeId?: number }) {
 }
 
 function Conversation({
+  conversationId,
   name,
   photo,
   online,
   personId,
-  messages,
 }: {
+  conversationId: string
   name: string
   photo: string
   online: boolean
-  personId: number
-  messages: Message[]
+  personId: string
 }) {
-  const [items, setItems] = useState<Message[]>(messages)
+  const [items, setItems] = useState<ChatMessage[]>([])
   const [draft, setDraft] = useState('')
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
@@ -161,6 +208,28 @@ function Conversation({
 
   const [showEmoji, setShowEmoji] = useState(false)
   const emojiRef = useRef<HTMLDivElement>(null)
+  
+
+  useEffect(() => {
+    async function loadMessages() {
+      try {
+        const response = await fetch(
+          `/api/conversations/${conversationId}/messages`,
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to load messages')
+        }
+
+        const data = await response.json()
+        setItems(data)
+      } catch (error) {
+        console.error('Failed to load messages:', error)
+      }
+    }
+
+    loadMessages()
+  }, [conversationId])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -186,24 +255,39 @@ function Conversation({
     }
   }, [])
 
-  function send() {
+  async function send() {
     const text = draft.trim()
 
     if (!text && !selectedImage) return
 
-    setItems((prev) => [
-      ...prev,
-      {
-        id: `local-${prev.length}`,
-        fromMe: true,
-        text: text || undefined,
-        image: selectedImage || undefined,
-        time: 'Now',
-      },
-    ])
+    try {
+      const response = await fetch(
+        `/api/conversations/${conversationId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: text || null,
+            imageUrl: selectedImage || null,
+          }),
+        },
+      )
 
-    setDraft('')
-    setSelectedImage(null)
+      if (!response.ok) {
+        throw new Error('Failed to send message')
+      }
+
+      const message = await response.json()
+
+      setItems((prev) => [...prev, message])
+
+      setDraft('')
+      setSelectedImage(null)
+    } catch (error) {
+      console.error('Failed to send message:', error)
+    }
   }
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -392,7 +476,7 @@ function Conversation({
   )
 }
 
-function Bubble({ message }: { message: Message }) {
+function Bubble({ message }: { message: ChatMessage }) {
   const { fromMe, text, image, time, reaction } = message
   return (
     <div className={cn('flex flex-col', fromMe ? 'items-end' : 'items-start')}>

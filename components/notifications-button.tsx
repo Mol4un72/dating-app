@@ -8,7 +8,8 @@ import {
   UserPlus,
   X,
 } from 'lucide-react'
-import { currentUser, NotificationType } from '@/lib/data'
+import type { NotificationType } from '@/types/notifications'
+import { useCurrentUser } from '@/context/user-context'
 
 const notificationTypes: Record<
   NotificationType,
@@ -31,11 +32,29 @@ const notificationTypes: Record<
   },
 }
 
+function formatNotificationTime(date: string) {
+  return new Intl.RelativeTimeFormat('en', {
+    numeric: 'auto',
+  }).format(
+    Math.round(
+      (new Date(date).getTime() - Date.now()) / 60000
+    ),
+    'minute'
+  )
+}
+
 export function NotificationsButton() {
+  const { user } = useCurrentUser()
   const [open, setOpen] = useState(false)
-  const [notifications, setNotifications] = useState(currentUser.notifications)
+  const [notifications, setNotifications] = useState(
+    user?.notifications ?? []
+  )
 
   const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setNotifications(user?.notifications ?? [])
+  }, [user?.notifications])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -149,7 +168,7 @@ export function NotificationsButton() {
                     </p>
 
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {item.time}
+                      {formatNotificationTime(item.createdAt)}
                     </p>
                   </div>
                 </button>
