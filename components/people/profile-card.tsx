@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { MapPin, BadgeCheck } from 'lucide-react'
-import { type Person } from '@/lib/data'
+import type { Person } from "@/types/person"
 import { useLikes } from '@/context/likes-context'
 import { cn } from '@/lib/utils'
 
@@ -31,13 +31,56 @@ export function ProfileCard({
     }[]
   >([])
 
-  function addLike() {
-    addLikedUser(person.id)
+  async function addLike() {
+    try {
+      const response = await fetch('/api/me/likes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: person.id,
+        }),
+      })
+    
+      const data = await response.json()
+    
+      if (!response.ok) {
+        console.error('Failed to like user:', data)
+        return
+      }
+    
+      addLikedUser(person.id)
+    
+      if (data.matched) {
+        console.log('💕 MATCH!', {
+          matchId: data.matchId,
+          conversationId: data.conversationId,
+        })
+      }
+    } catch (error) {
+      console.error('Failed to like user:', error)
+    }
   }
 
-  function removeLike(e: React.MouseEvent) {
+  async function removeLike(e: React.MouseEvent) {
     e.stopPropagation()
-    removeLikedUser(person.id)
+    
+    try {
+      const response = await fetch(`/api/me/likes/${person.id}`, {
+        method: 'DELETE',
+      })
+    
+      if (!response.ok) {
+        const data = await response.json()
+        console.error('Failed to remove like:', data)
+        return
+      }
+    
+      removeLikedUser(person.id)
+    } catch (error) {
+      console.error('Failed to remove like:', error)
+    }
   }
 
   const like = ({

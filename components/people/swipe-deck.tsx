@@ -1,8 +1,8 @@
 'use client'
 
 import { useRef } from 'react'
-import { type Person } from '@/lib/data'
 import { ProfileCard } from '@/components/people/profile-card'
+import type { Person } from "@/types/person"
 
 export function SwipeDeck({
   people,

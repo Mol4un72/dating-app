@@ -1,6 +1,6 @@
 import { MapPin } from "lucide-react"
 import { VerifiedBadge } from '@/components/tag'
-import { type Person } from '@/lib/data'
+import { type Person } from '@/types/person'
 
 export function LikedCard({
     person,
