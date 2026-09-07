@@ -51,8 +51,6 @@ export default function SettingsPage() {
 
     interestedIn: 'Everyone',
     ageRange: '25 – 35',
-    maxDistance: 20,
-    verifiedOnly: false,
 
     theme: activeTheme,
     email: '',
@@ -123,8 +121,6 @@ export default function SettingsPage() {
     
       interestedIn: user.settings?.interestedIn ?? prev.interestedIn,
       ageRange: user.settings?.ageRange ?? prev.ageRange,
-      maxDistance: user.settings?.maxDistance ?? prev.maxDistance,
-      verifiedOnly: user.settings?.verifiedOnly ?? prev.verifiedOnly,
       theme: (user.settings?.theme as 'light' | 'dark' | 'system') ?? activeTheme,
     
       email: user.email,
@@ -153,8 +149,6 @@ export default function SettingsPage() {
           shareData: newSettings.shareData,
           interestedIn: newSettings.interestedIn,
           ageRange: newSettings.ageRange,
-          maxDistance: newSettings.maxDistance,
-          verifiedOnly: newSettings.verifiedOnly,
           theme: newSettings.theme,
         }),
       })

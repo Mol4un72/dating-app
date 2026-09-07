@@ -12,7 +12,6 @@ import {
 export type Filters = {
   interestedIn: string
   ageRange: string
-  distance: string
 }
 
 export type FiltersContextType = {
@@ -24,7 +23,6 @@ export type FiltersContextType = {
 export const defaultFilters: Filters = {
   interestedIn: 'Everyone',
   ageRange: '25 – 35',
-  distance: '20',
 }
 
 const FILTERS_STORAGE_KEY = 'lumi_filters'
@@ -39,7 +37,6 @@ const readStoredFilters = (): Filters => {
       return {
         interestedIn: parsed.interestedIn ?? defaultFilters.interestedIn,
         ageRange: parsed.ageRange ?? defaultFilters.ageRange,
-        distance: parsed.distance ?? defaultFilters.distance,
       }
     }
   } catch {

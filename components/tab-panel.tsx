@@ -8,6 +8,7 @@ import { Switch } from '@/components/switch'
 import type { PasswordState } from '@/types/password'
 import type { TabType } from '@/types/tab'
 import type { SettingsState } from '@/types/settings'
+import type { Filters } from '@/context/filters-context'
 
 export function TabPanel({
   tab,
@@ -24,8 +25,8 @@ export function TabPanel({
 }: {
   tab: TabType
   settings: SettingsState
-  filters: { interestedIn: string, ageRange: string, distance: string }
-  setFilters: React.Dispatch<React.SetStateAction<{ interestedIn: string, ageRange: string, distance: string }>>
+  filters: Filters
+  setFilters: React.Dispatch<React.SetStateAction<Filters>>
   onToggle: (key: keyof SettingsState) => void
   onValueChange: (key: keyof SettingsState, value: string | number | boolean) => void
   blockedUsers: string[]
@@ -198,36 +199,6 @@ export function TabPanel({
                 ))}
               </div>
             </div>
-              
-              
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">
-                Distance
-              </h3>
-              
-              <div className="mt-2">
-                <input
-                  type="range"
-                  min="0"
-                  max="51"
-                  value={filters.distance}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      distance: e.target.value,
-                    }))
-                  }
-                  className="w-full"
-                />
-
-                <div className="mt-3 text-center text-sm font-medium text-foreground">
-                  {filters.distance === '51'
-                    ? 'Any distance'
-                    : `${filters.distance} km`}
-                </div>
-              </div>
-            </div>
-                  
           </div>
         </div>
       )

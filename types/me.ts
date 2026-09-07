@@ -24,7 +24,6 @@ export type Me = {
     interestedIn: string
     ageRange: string
     maxDistance: number
-    verifiedOnly: boolean
     theme: string
   } | null
 }

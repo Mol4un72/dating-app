@@ -14,8 +14,6 @@ export interface SettingsState {
   // Preferences
   interestedIn: string
   ageRange: string
-  maxDistance: number | string
-  verifiedOnly: boolean
 
   // Account
   theme: 'light' | 'dark' | 'system'

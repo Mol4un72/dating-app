@@ -58,7 +58,6 @@ export async function PATCH(request: Request) {
       interestedIn?: string
       ageRange?: string
       maxDistance?: number
-      verifiedOnly?: boolean
       theme?: string
     } = {}
 
@@ -100,10 +99,6 @@ export async function PATCH(request: Request) {
 
     if (body.maxDistance !== undefined) {
       data.maxDistance = Number(body.maxDistance)
-    }
-
-    if (body.verifiedOnly !== undefined) {
-      data.verifiedOnly = Boolean(body.verifiedOnly)
     }
 
     if (body.theme !== undefined) {

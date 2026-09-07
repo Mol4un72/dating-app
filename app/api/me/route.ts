@@ -69,7 +69,6 @@ function formatUser(user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>
           interestedIn: user.settings.interestedIn,
           ageRange: user.settings.ageRange,
           maxDistance: user.settings.maxDistance,
-          verifiedOnly: user.settings.verifiedOnly,
           theme: user.settings.theme,
         }
       : null,

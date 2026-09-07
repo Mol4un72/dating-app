@@ -62,22 +62,12 @@ export default function DiscoverPage() {
 
   const filteredPeople = useMemo(() => {
     return people.filter((person) => {
-      // Gender
-      if (
-        filters.interestedIn !== 'Everyone' &&
-        person.gender
-      ) {
-        if (filters.interestedIn === 'Women') {
-          if (person.gender !== 'Female') {
-            return false
-          }
-        }
+      if (filters.interestedIn === 'Women' && person.gender !== 'Woman') {
+        return false
+      } 
 
-        if (filters.interestedIn === 'Men') {
-          if (person.gender !== 'Male') {
-            return false
-          }
-        }
+      if (filters.interestedIn === 'Men' && person.gender !== 'Man') {
+        return false
       }
     
       // Age
@@ -104,18 +94,6 @@ export default function DiscoverPage() {
           if (person.age < 45) {
             return false
           }
-        }
-      }
-    
-      // Distance
-      if (filters.distance !== '51') {
-        const maxDistance = Number(filters.distance)
-      
-        if (
-          !Number.isNaN(maxDistance) &&
-          person.distance > maxDistance
-        ) {
-          return false
         }
       }
     

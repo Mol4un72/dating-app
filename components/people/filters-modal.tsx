@@ -97,37 +97,6 @@ export function FiltersModal({
           </div>
         </div>
 
-
-        {/* Distance */}
-        <div>
-          <h3 className="text-sm font-semibold text-foreground">
-            Distance
-          </h3>
-
-          <div className="mt-3">
-            <input
-              type="range"
-              min="0"
-              max="51"
-              value={draft.distance}
-              onChange={(e) =>
-                setDraft((prev) => ({
-                  ...prev,
-                  distance: e.target.value,
-                }))
-              }
-              className="w-full"
-            />
-
-            <div className="mt-3 text-center text-sm font-medium text-foreground">
-              {draft.distance === '51'
-                ? 'Any distance'
-                : `${draft.distance} km`}
-            </div>
-          </div>
-        </div>
-
-
         <div className="flex flex-col gap-2 mt-1">
           <PillButton
             block
