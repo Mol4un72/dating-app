@@ -1,41 +1,73 @@
 import Link from 'next/link'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
+import type { ButtonHTMLAttributes } from 'react'
 
 const pillButton = cva(
   'inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-all outline-none select-none focus-visible:ring-4 focus-visible:ring-primary/25 disabled:pointer-events-none disabled:opacity-50 active:translate-y-px [&_svg]:size-[1.1em]',
   {
     variants: {
       variant: {
-        primary: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/70',
-        outline: 'border border-border bg-card text-foreground hover:bg-secondary',
-        ghost: 'text-foreground hover:bg-secondary',
+        primary:
+          'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90',
+        secondary:
+          'bg-secondary text-secondary-foreground hover:bg-secondary/70',
+        outline:
+          'border border-border bg-card text-foreground hover:bg-secondary',
+        ghost:
+          'text-foreground hover:bg-secondary',
       },
       size: {
         sm: 'h-9 px-4 text-sm',
         md: 'h-11 px-5 text-[0.95rem]',
         lg: 'h-14 px-7 text-base',
       },
-      block: { true: 'w-full', false: '' },
+      block: {
+        true: 'w-full',
+        false: '',
+      },
     },
-    defaultVariants: { variant: 'primary', size: 'md', block: false },
+    defaultVariants: {
+      variant: 'primary',
+      size: 'md',
+      block: false,
+    },
   },
 )
 
-type Props = VariantProps<typeof pillButton> & {
-  className?: string
-  href?: string
-} & React.ButtonHTMLAttributes<HTMLButtonElement>
+type Props = VariantProps<typeof pillButton> &
+  ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: string
+  }
 
-export function PillButton({ className, variant, size, block, href, type, ...props }: Props) {
-  const classes = cn(pillButton({ variant, size, block }), className)
+export function PillButton({
+  className,
+  variant,
+  size,
+  block,
+  href,
+  children,
+  ...props
+}: Props) {
+  const classes = cn(
+    pillButton({ variant, size, block }),
+    className,
+  )
+
   if (href) {
     return (
       <Link href={href} className={classes}>
-        {props.children}
+        {children}
       </Link>
     )
   }
-  return <button type={type ?? 'button'} className={classes} {...props} />
+
+  return (
+    <button
+      {...props}
+      className={classes}
+    >
+      {children}
+    </button>
+  )
 }

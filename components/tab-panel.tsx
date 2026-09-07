@@ -5,7 +5,9 @@ import { Field, Input, Select } from '@/components/field'
 import { PillButton } from '@/components/pill-button'
 import { Switch } from '@/components/switch'
 
-import type { SettingsState, TabType, PasswordState } from '@/lib/data'
+import type { PasswordState } from '@/types/password'
+import type { TabType } from '@/types/tab'
+import type { SettingsState } from '@/types/settings'
 
 export function TabPanel({
   tab,
@@ -60,14 +62,6 @@ export function TabPanel({
                 <p className="text-xs text-muted-foreground mt-0.5">Receive notifications for incoming chat messages.</p>
               </div>
               <Switch checked={settings.newMessages} onChange={() => onToggle('newMessages')} />
-            </div>
-
-            <div className="flex items-center justify-between py-4">
-              <div className="pr-4">
-                <h3 className="text-sm font-semibold text-foreground">Likes Messages</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Get notified when someone likes you.</p>
-              </div>
-              <Switch checked={settings.superLikes} onChange={() => onToggle('superLikes')} />
             </div>
           </div>
         </div>

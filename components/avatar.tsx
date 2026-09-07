@@ -15,7 +15,7 @@ export function Avatar({
   ring,
   className,
 }: {
-  src: string
+  src?: string
   alt: string
   size?: keyof typeof sizes
   online?: boolean
