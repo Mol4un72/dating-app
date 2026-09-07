@@ -12,8 +12,8 @@ import {
 
 import { Logo } from '@/components/logo'
 import { Avatar } from '@/components/avatar'
-import { currentUser } from '@/lib/data'
 import { cn } from '@/lib/utils'
+import { useCurrentUser } from '@/context/user-context'
 
 const nav = [
   {
@@ -44,6 +44,8 @@ export function AppShell({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+
+  const { user, isLoading: isLoadingUser } = useCurrentUser()
 
   const isActive = (href: string) => {
     if (href === '/profile') {
@@ -120,15 +122,15 @@ export function AppShell({
           className="mt-auto flex items-center gap-3 rounded-2xl px-2 py-2 transition-colors hover:bg-secondary"
         >
           <Avatar
-            src={currentUser.photo}
-            alt={currentUser.name}
+            src={user?.photos?.[0]?.url}
+            alt={user?.name ?? 'User'}
             size="sm"
             online
           />
 
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-foreground">
-              {currentUser.name}
+              {user?.name}
             </p>
 
             <p className="truncate text-xs text-muted-foreground">

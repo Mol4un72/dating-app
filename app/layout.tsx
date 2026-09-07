@@ -3,6 +3,8 @@ import { Plus_Jakarta_Sans, Geist } from 'next/font/google'
 import './globals.css'
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from '@/context/theme-context';
+import { AuthSessionProvider } from '@/context/session'
+import { UserProvider } from '@/context/user-context';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -64,9 +66,13 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased">
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <AuthSessionProvider>
+          <ThemeProvider>
+            <UserProvider>
+              {children}
+            </UserProvider>
+          </ThemeProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   )

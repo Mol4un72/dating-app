@@ -9,6 +9,7 @@ import { PillButton } from '@/components/pill-button'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -27,8 +28,30 @@ export default function LoginPage() {
     resolver: zodResolver(schema)
   })
 
-  function onSubmit(data: FormData) {
-    router.push('/discover')
+  async function onSubmit(data: FormData) {
+    console.log('SUBMIT START', data.email)
+    
+    try {
+      const result = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      })
+    
+      console.log('SIGN IN RESULT:', result)
+    
+      if (result?.error) {
+        console.error('LOGIN ERROR:', result.error)
+        return
+      }
+    
+      console.log('LOGIN SUCCESS')
+    
+      router.push('/discover')
+      router.refresh()
+    } catch (error) {
+      console.error('LOGIN EXCEPTION:', error)
+    }
   }
 
   return (

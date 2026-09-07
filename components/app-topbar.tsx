@@ -1,8 +1,10 @@
+'use client'
+
 import Link from 'next/link'
 import { Logo } from '@/components/logo'
 import { Avatar } from '@/components/avatar'
-import { currentUser } from '@/lib/data'
 import { cn } from '@/lib/utils'
+import { useCurrentUser } from '@/context/user-context'
 
 export function AppTopBar({
   title,
@@ -13,6 +15,8 @@ export function AppTopBar({
   actions?: React.ReactNode
   className?: string
 }) {
+  const { user } = useCurrentUser()
+
   return (
     <header
       className={cn(
@@ -24,12 +28,27 @@ export function AppTopBar({
         <span className="lg:hidden">
           <Logo showWordmark={!title} />
         </span>
-        {title && <h1 className="text-xl font-bold tracking-tight text-foreground">{title}</h1>}
+
+        {title && (
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            {title}
+          </h1>
+        )}
       </div>
+
       <div className="flex items-center gap-2">
+
         {actions}
-        <Link href="/profile" className="lg:hidden">
-          <Avatar src={currentUser.photo} alt={currentUser.name} size="sm" />
+
+        <Link
+          href="/profile"
+          className="lg:hidden"
+        >
+          <Avatar
+            src={user?.photos?.[0]?.url}
+            alt={user?.name ?? 'name'}
+            size="sm"
+          />
         </Link>
       </div>
     </header>
