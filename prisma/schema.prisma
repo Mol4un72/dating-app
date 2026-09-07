@@ -7,40 +7,71 @@ datasource db {
   provider = "postgresql"
 }
 
-// ========================================
+// =========================
 // AUTH.JS
-// ========================================
+// =========================
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
+  email         String    @unique
   emailVerified DateTime?
-  image         String?
+  passwordHash  String?
 
-  accounts      Account[]
-  sessions      Session[]
-  profile       Profile?
+  // Profile
+  name          String?
+  age           Int?
+  gender        String?
+  location      String?
+  bio           String?
+  verified      Boolean   @default(false)
+
+  // Account
+  phone         String?
+  language      String    @default("English")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  // Auth.js relations
+  accounts      Account[]
+  sessions      Session[]
+
+  // Dating relations
+  profile       Profile?
+  photos        ProfilePhoto[]
+  interests     ProfileInterest[]
+
+  sentLikes     Like[]   @relation("SentLikes")
+  receivedLikes Like[]   @relation("ReceivedLikes")
+
+  matches1      Match[]  @relation("MatchUser1")
+  matches2      Match[]  @relation("MatchUser2")
+
+  notifications Notification[]
+
+  conversations ConversationParticipant[]
+  messages      Message[]
+
+  settings      UserSettings?
+
+  blockedUsers  BlockedUser[] @relation("Blocker")
+  blockedBy     BlockedUser[] @relation("Blocked")
 }
 
 model Account {
   id                String  @id @default(cuid())
   userId            String
-
   type              String
   provider          String
   providerAccountId String
 
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+  refresh_token String?
+  access_token  String?
+  expires_at    Int?
+  token_type    String?
+  scope         String?
+  id_token      String?
+  session_state String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -67,68 +98,227 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ========================================
-// DATING PROFILE
-// ========================================
+// =========================
+// PROFILE
+// =========================
 
 model Profile {
-  id        String @id @default(cuid())
-  userId    String @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
-  firstName String?
-  birthDate DateTime?
-  bio       String?
-  gender    Gender?
-  lookingFor Gender?
-
-  city      String?
+  // Additional profile data
+  location String?
+  bio      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  photos    ProfilePhoto[]
-  interests ProfileInterest[]
-
-  @@index([city])
-  @@index([gender])
-  @@index([lookingFor])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-enum Gender {
-  MALE
-  FEMALE
-  NON_BINARY
-  OTHER
-}
+// =========================
+// PHOTOS
+// =========================
 
 model ProfilePhoto {
   id        String   @id @default(cuid())
-  profileId String
+  userId    String
   url       String
   position  Int      @default(0)
-
   createdAt DateTime @default(now())
 
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([profileId])
+  @@index([userId])
 }
+
+// =========================
+// INTERESTS
+// =========================
 
 model Interest {
   id   String @id @default(cuid())
   name String @unique
 
-  profiles ProfileInterest[]
+  users ProfileInterest[]
 }
 
 model ProfileInterest {
-  profileId  String
+  userId     String
   interestId String
 
-  profile  Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   interest Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
 
-  @@id([profileId, interestId])
+  @@id([userId, interestId])
   @@index([interestId])
+}
+
+// =========================
+// LIKES
+// =========================
+
+model Like {
+  id String @id @default(cuid())
+
+  fromUserId String
+  toUserId   String
+
+  createdAt DateTime @default(now())
+
+  fromUser User @relation("SentLikes", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User @relation("ReceivedLikes", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId])
+  @@index([toUserId])
+}
+
+// =========================
+// MATCHES
+// =========================
+
+model Match {
+  id String @id @default(cuid())
+
+  user1Id String
+  user2Id String
+
+  createdAt DateTime @default(now())
+
+  user1 User @relation("MatchUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2 User @relation("MatchUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  conversation Conversation?
+
+  @@unique([user1Id, user2Id])
+  @@index([user2Id])
+}
+
+// =========================
+// NOTIFICATIONS
+// =========================
+
+enum NotificationType {
+  like
+  match
+  message
+  appUpdate
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  type        NotificationType
+
+  title       String
+  description String
+
+  unread      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+// =========================
+// SETTINGS
+// =========================
+
+model UserSettings {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  // Notifications
+  newMatches Boolean @default(true)
+  newMessages Boolean @default(true)
+  appUpdates Boolean @default(false)
+  emailAlerts Boolean @default(true)
+
+  // Privacy
+  profileVisibility String @default("everyone")
+  showOnlineStatus  Boolean @default(true)
+  shareData         Boolean @default(true)
+
+  // Preferences
+  interestedIn String  @default("Everyone")
+  ageRange    String   @default("25 – 35")
+  maxDistance Int      @default(20)
+  verifiedOnly Boolean @default(false)
+
+  // Account
+  theme String @default("light")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model BlockedUser {
+  id String @id @default(cuid())
+
+  blockerId String
+  blockedId String
+
+  createdAt DateTime @default(now())
+
+  blocker User @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+// =========================
+// CONVERSATIONS
+// =========================
+
+model Conversation {
+  id String @id @default(cuid())
+
+  matchId String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  match Match? @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  conversationId String
+  userId         String
+
+  joinedAt DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+  @@index([userId])
+}
+
+// =========================
+// MESSAGES
+// =========================
+
+model Message {
+  id String @id @default(cuid())
+
+  conversationId String
+  senderId       String
+
+  text     String?
+  imageUrl String?
+  reaction String?
+
+  createdAt DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
 }
