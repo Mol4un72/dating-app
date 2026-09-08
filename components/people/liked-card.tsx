@@ -30,7 +30,7 @@ export function LikedCard({
                         {person.verified && <VerifiedBadge className="text-white/80" />}
                     </div>
                     <p className="flex items-center gap-1 text-xs text-white/80">
-                        <MapPin className="size-3" /> {person.distance}
+                        <MapPin className="size-3" /> {person.location}
                     </p>
                 </div>
                 <button

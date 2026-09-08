@@ -408,7 +408,7 @@ export default function SettingsPage() {
           {/* Left Column: Profile Card & Sidebar Menu */}
           <div className="flex flex-col gap-6">
             <section className="flex flex-col items-center rounded-3xl border border-border bg-card p-6 text-center shadow-sm">
-              <Avatar src={user?.photos?.[0].url} alt={user?.name ?? 'User'} size="xl" ring />
+              <Avatar src={user?.photos?.[0]?.url} alt={user?.name ?? 'User'} size="xl" ring />
               <div className="mt-4 flex items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
                   {user?.name}, {user?.age}

@@ -32,6 +32,5 @@ export type Draft = Me & {
   filters: {
     interestedIn: string
     ageRange: string
-    distance: string
   }
 }

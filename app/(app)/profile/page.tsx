@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect} from 'react'
-import { MapPin, Pencil, Settings, Ruler, Users, } from 'lucide-react'
+import { MapPin, Pencil, Settings, Users, Ruler } from 'lucide-react'
 import { AppTopBar } from '@/components/app-topbar'
 import { Avatar } from '@/components/avatar'
 import { Tag, VerifiedBadge } from '@/components/tag'
@@ -181,18 +181,9 @@ export default function ProfilePage() {
     if (!photo) return
 
     try {
-      const response = await fetch(
-        '/api/me/photos',
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: photo.id,
-          }),
-        }
-      )
+      const response = await fetch(`/api/me/photos/${photo.id}`, {
+        method: 'DELETE',
+      })
 
       const data = await response.json()
 
@@ -318,7 +309,6 @@ export default function ProfilePage() {
    filters: {
      interestedIn: filters?.interestedIn ?? 'Everyone',
      ageRange: filters?.ageRange ?? '18 – 25',
-     distance: filters?.distance ?? '51',
    },
   }
 
@@ -415,7 +405,6 @@ export default function ProfilePage() {
                 <ul className="mt-4 flex flex-col gap-4">
                   <PreferenceRow icon={Users} label="Interested in" value={filters.interestedIn} />
                   <PreferenceRow icon={Ruler} label="Age range" value={filters.ageRange} />
-                  <PreferenceRow icon={MapPin} label="Distance" value={filters.distance === '51' ? 'Any distance' : `${filters.distance} km`} />
                 </ul>
               </div>
 
@@ -669,35 +658,6 @@ export default function ProfilePage() {
             <h3 className="text-sm font-semibold text-foreground">
               Distance
             </h3>
-            
-            <div className="mt-2">
-              <input
-                type="range"
-                min="0"
-                max="51"
-                value={currentDraft.filters.distance}
-                onChange={(e) =>
-                  setDraft((prev) => {
-                    if (!prev) return prev
-                  
-                    return {
-                      ...prev,
-                      filters: {
-                        ...prev.filters,
-                        distance: e.target.value,
-                      },
-                    }
-                  })
-                }
-                className="w-full"
-              />
-
-              <div className="mt-3 text-center text-sm font-medium text-foreground">
-                {currentDraft.filters.distance === '51'
-                  ? 'Any distance'
-                  : `${currentDraft.filters.distance} km`}
-              </div>
-            </div>
           </div>
                 
         </div>

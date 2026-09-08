@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { del } from '@vercel/blob'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 
@@ -47,17 +48,40 @@ export async function DELETE(
         {
           error: 'You must keep at least one photo',
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       )
     }
+
+    await del(photo.url)
 
     await prisma.profilePhoto.delete({
       where: {
         id: photo.id,
       },
     })
+
+    const remainingPhotos =
+      await prisma.profilePhoto.findMany({
+        where: {
+          userId: session.user.id,
+        },
+        orderBy: {
+          position: 'asc',
+        },
+      })
+
+    await prisma.$transaction(
+      remainingPhotos.map((photo, index) =>
+        prisma.profilePhoto.update({
+          where: {
+            id: photo.id,
+          },
+          data: {
+            position: index,
+          },
+        })
+      )
+    )
 
     return NextResponse.json({
       success: true,
