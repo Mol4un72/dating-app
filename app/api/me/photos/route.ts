@@ -5,7 +5,10 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(request: Request) {
   try {
+    console.log('PHOTO UPLOAD: start')
+
     const session = await auth()
+    console.log('PHOTO UPLOAD: auth', Boolean(session?.user?.id))
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -16,6 +19,12 @@ export async function POST(request: Request) {
 
     const formData = await request.formData()
     const file = formData.get('file')
+
+    console.log('PHOTO UPLOAD: file', {
+      isFile: file instanceof File,
+      type: file instanceof File ? file.type : null,
+      size: file instanceof File ? file.size : null,
+    })
 
     if (!(file instanceof File)) {
       return NextResponse.json(
@@ -44,12 +53,16 @@ export async function POST(request: Request) {
       },
     })
 
+    console.log('PHOTO UPLOAD: photos count', photosCount)
+
     if (photosCount >= 3) {
       return NextResponse.json(
         { error: 'Maximum 3 photos allowed' },
         { status: 400 }
       )
     }
+
+    console.log('PHOTO UPLOAD: before blob')
 
     const blob = await put(
       `profiles/${session.user.id}/${crypto.randomUUID()}-${file.name}`,
@@ -59,6 +72,8 @@ export async function POST(request: Request) {
       }
     )
 
+    console.log('PHOTO UPLOAD: blob success', blob.url)
+
     const photo = await prisma.profilePhoto.create({
       data: {
         userId: session.user.id,
@@ -66,6 +81,8 @@ export async function POST(request: Request) {
         position: photosCount,
       },
     })
+
+    console.log('PHOTO UPLOAD: database success', photo.id)
 
     return NextResponse.json(
       {
