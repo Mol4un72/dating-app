@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from '@/context/theme-context';
 import { AuthSessionProvider } from '@/context/session'
 import { UserProvider } from '@/context/user-context';
+import NotificationsToast from '@/components/notifications-toast';
+import { Toaster } from 'sonner'
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -69,6 +71,8 @@ export default function RootLayout({
         <AuthSessionProvider>
           <ThemeProvider>
             <UserProvider>
+              <Toaster />
+              <NotificationsToast />
               {children}
             </UserProvider>
           </ThemeProvider>

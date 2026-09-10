@@ -33,14 +33,35 @@ const notificationTypes: Record<
 }
 
 function formatNotificationTime(date: string) {
-  return new Intl.RelativeTimeFormat('en', {
+  const now = Date.now()
+  const timestamp = new Date(date).getTime()
+
+  const diffMs = timestamp - now
+  const diffMinutes = Math.round(diffMs / 60000)
+  const diffHours = Math.round(diffMs / 3600000)
+  const diffDays = Math.round(diffMs / 86400000)
+
+  const rtf = new Intl.RelativeTimeFormat('en', {
     numeric: 'auto',
-  }).format(
-    Math.round(
-      (new Date(date).getTime() - Date.now()) / 60000
-    ),
-    'minute'
-  )
+  })
+
+  if (Math.abs(diffMinutes) < 60) {
+    return rtf.format(diffMinutes, 'minute')
+  }
+
+  if (Math.abs(diffHours) < 24) {
+    return rtf.format(diffHours, 'hour')
+  }
+
+  if (Math.abs(diffDays) < 7) {
+    return rtf.format(diffDays, 'day')
+  }
+
+  return new Intl.DateTimeFormat('en', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date(date))
 }
 
 export function NotificationsButton() {
