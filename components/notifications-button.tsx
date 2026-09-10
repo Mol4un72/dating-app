@@ -134,6 +134,14 @@ export function NotificationsButton() {
             </button>
           </div>
 
+          {notifications.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-2 p-4 sm:p-6">
+              <p className="text-sm text-muted-foreground sm:text-base mt-2">
+                No notifications yet
+              </p>
+            </div>
+          )}
+
           <div className="max-h-[calc(100vh-8rem)] overflow-y-auto p-2 sm:max-h-96 ">
             {notifications.map((item) => {
               const config =
