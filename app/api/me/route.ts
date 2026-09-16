@@ -117,6 +117,7 @@ export async function PATCH(request: Request) {
      */
 
     const userData: {
+      email?: string
       name?: string
       age?: number
       gender?: string
@@ -125,6 +126,34 @@ export async function PATCH(request: Request) {
       phone?: string
       language?: string
     } = {}
+
+    if (body.email !== undefined) {
+      const email = String(body.email).trim().toLowerCase()
+
+      if (!email || !email.includes('@')) {
+        return NextResponse.json(
+          { error: 'Please enter a valid email address' },
+          { status: 400 },
+        )
+      }
+
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email,
+          id: { not: session.user.id },
+        },
+        select: { id: true },
+      })
+
+      if (existingUser) {
+        return NextResponse.json(
+          { error: 'This email is already in use' },
+          { status: 409 },
+        )
+      }
+
+      userData.email = email
+    }
 
     if (body.name !== undefined) {
       userData.name = String(body.name).trim()

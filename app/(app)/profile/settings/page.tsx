@@ -33,7 +33,7 @@ import { signOut } from 'next-auth/react'
 import { useCurrentUser } from '@/context/user-context'
 
 export default function SettingsPage() {
-  const { user, isLoading } = useCurrentUser()
+  const { user, isLoading, refreshUser } = useCurrentUser()
   const router = useRouter()
   const { theme: activeTheme, setTheme: setActiveTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -201,10 +201,43 @@ export default function SettingsPage() {
   // General field update handler
   const handleValueChange = (key: keyof SettingsState, value: string | number | boolean) => {
     const updated = { ...settings, [key]: value } as SettingsState
+
+    if (key === 'email' || key === 'phone' || key === 'language') {
+      setSettings(updated)
+      void updateAccountField(key, String(value))
+      return
+    }
+
     if (key === 'theme') {
       setActiveTheme(value as 'light' | 'dark' | 'system')
     }
     saveSettings(updated)
+  }
+
+  const updateAccountField = async (
+    key: 'email' | 'phone' | 'language',
+    value: string,
+  ) => {
+    try {
+      const response = await fetch('/api/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [key]: value }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null)
+        throw new Error(data?.error ?? `Profile API: ${response.status}`)
+      }
+
+      await refreshUser()
+    } catch (error) {
+      console.error('Failed to update account:', error)
+      showToast(
+        error instanceof Error ? error.message : 'Failed to update account',
+        'error',
+      )
+    }
   }
 
   // Handle blocking a user
@@ -239,7 +272,7 @@ export default function SettingsPage() {
   }
 
   // Change password handler
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!passwordState.current || !passwordState.new || !passwordState.confirm) {
       showToast('Please fill all password fields', 'error')
@@ -254,9 +287,30 @@ export default function SettingsPage() {
       return
     }
 
-    // Simulate successful password change
-    showToast('Password updated successfully')
-    setPasswordState({ current: '', new: '', confirm: '' })
+    try {
+      const response = await fetch('/api/me/password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: passwordState.current,
+          newPassword: passwordState.new,
+        }),
+      })
+
+      const data = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(data?.error ?? 'Failed to update password')
+      }
+
+      showToast('Password updated successfully')
+      setPasswordState({ current: '', new: '', confirm: '' })
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : 'Failed to update password',
+        'error',
+      )
+    }
   }
 
   // Delete account handler
