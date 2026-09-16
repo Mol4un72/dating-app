@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { AppShell } from '@/components/app-shell'
 import { FiltersProvider } from '@/context/filters-context'
 import { LikesProvider } from '@/context/likes-context'
-import { Toaster } from 'sonner'
 import NotificationsToast from '@/components/notifications-toast'
 
 export default async function AppGroupLayout({
@@ -21,9 +20,8 @@ export default async function AppGroupLayout({
     <LikesProvider>
       <FiltersProvider>
         <AppShell>
-          <Toaster />
-            <NotificationsToast />
-              {children}
+          <NotificationsToast />
+          {children}
         </AppShell>
       </FiltersProvider>
     </LikesProvider>

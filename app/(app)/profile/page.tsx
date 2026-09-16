@@ -46,7 +46,9 @@ export default function ProfilePage() {
 
   const schema = z.object({
     name: z.string().min(2, 'Minimum 2 symbols'),
-    location: z.string().min(4, 'Minimum 4 symbols'),
+    location: z
+      .string().min(4, 'Minimum 4 symbols')
+      .max(20, 'Maximum 20 symbols'),
     bio: z
       .string()
       .min(20, 'Minimum 20 symbols')
@@ -140,6 +142,15 @@ export default function ProfilePage() {
     setDraft((prev) => {
       if (!prev) return prev
       const isSelected = prev.interests.includes(interest)
+
+      if (!isSelected && prev.interests.length >= 8) {
+        setError({
+          interests: true,
+          photos: false,
+        })
+
+        return prev
+      }
 
       if (isSelected && prev.interests.length === 1) {
         setError({
@@ -290,8 +301,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-svh items-center justify-center">
-        Loading...
+      <div className="flex h-svh w-full items-center justify-center bg-background">
+        <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     )
   }
@@ -436,7 +447,6 @@ export default function ProfilePage() {
                 </div>
               </div>
             </section>
-
           </div>
         </div>
       </div>
@@ -527,7 +537,9 @@ export default function ProfilePage() {
 
           {error.interests && (
             <div className="mt-3 w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
-              Please keep at least one interest selected.
+              {currentDraft.interests.length >= 8
+                ? 'You can select up to 8 interests.'
+                : 'Please keep at least one interest selected.'}
             </div>
           )}
         </div>
@@ -652,14 +664,7 @@ export default function ProfilePage() {
                 </Tag>
               ))}
             </div>
-          </div>
-            
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">
-              Distance
-            </h3>
-          </div>
-                
+          </div>                
         </div>
                 
         <PillButton

@@ -64,6 +64,14 @@ export function TabPanel({
               </div>
               <Switch checked={settings.newMessages} onChange={() => onToggle('newMessages')} />
             </div>
+
+            <div className="flex items-center justify-between py-4">
+              <div className="pr-4">
+                <h3 className="text-sm font-semibold text-foreground">New Likes</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Receive alert when someone likes your profile.</p>
+              </div>
+              <Switch checked={settings.newLikes} onChange={() => onToggle('newLikes')} />
+            </div>
           </div>
         </div>
       )

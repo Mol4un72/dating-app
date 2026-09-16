@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Bell,
   Shield,
@@ -38,9 +38,11 @@ export default function SettingsPage() {
   const { theme: activeTheme, setTheme: setActiveTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [selectedTab, setSelectedTab] = useState<TabType | null>(null)
+  const settingsRequestId = useRef(0)
   const [settings, setSettings] = useState<SettingsState>({
     newMatches: true,
     newMessages: true,
+    newLikes: true,
     appUpdates: false,
     emailAlerts: true,
 
@@ -86,6 +88,8 @@ export default function SettingsPage() {
     }
 
     async function loadSettings() {
+      const requestId = ++settingsRequestId.current
+
       try {
         const response = await fetch('/api/me/settings', {
           method: 'GET',
@@ -97,6 +101,8 @@ export default function SettingsPage() {
         }
 
         const data = await response.json()
+
+        if (requestId !== settingsRequestId.current) return
 
         setSettings((prev) => ({
           ...prev,
@@ -131,6 +137,7 @@ export default function SettingsPage() {
 
   // Save settings helper
   const saveSettings = async (newSettings: SettingsState) => {
+    const requestId = ++settingsRequestId.current
     setSettings(newSettings)
 
     try {
@@ -142,6 +149,7 @@ export default function SettingsPage() {
         body: JSON.stringify({
           newMatches: newSettings.newMatches,
           newMessages: newSettings.newMessages,
+          newLikes: newSettings.newLikes,
           appUpdates: newSettings.appUpdates,
           emailAlerts: newSettings.emailAlerts,
           profileVisibility: newSettings.profileVisibility,
@@ -162,6 +170,8 @@ export default function SettingsPage() {
       }
 
       const savedSettings = await response.json()
+
+      if (requestId !== settingsRequestId.current) return
 
       setSettings((prev) => ({
         ...prev,

@@ -232,6 +232,7 @@ model UserSettings {
   // Notifications
   newMatches Boolean @default(true)
   newMessages Boolean @default(true)
+  newLikes Boolean @default(true)
   appUpdates Boolean @default(false)
   emailAlerts Boolean @default(true)
 

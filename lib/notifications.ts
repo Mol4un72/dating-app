@@ -21,6 +21,7 @@ export async function createNotification({
     select: {
       newMatches: true,
       newMessages: true,
+      newLikes: true,
       appUpdates: true,
     },
   })
@@ -30,6 +31,10 @@ export async function createNotification({
   }
 
   if (type === 'message' && settings?.newMessages === false) {
+    return null
+  }
+
+  if (type === 'like' && settings?.newLikes === false) {
     return null
   }
 

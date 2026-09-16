@@ -2,6 +2,7 @@ export interface SettingsState {
   // Notifications
   newMatches: boolean
   newMessages: boolean
+  newLikes: boolean
   appUpdates: boolean
   emailAlerts: boolean
 

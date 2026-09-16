@@ -1,0 +1,2 @@
+ALTER TABLE "UserSettings"
+ADD COLUMN "newLikes" BOOLEAN NOT NULL DEFAULT true;

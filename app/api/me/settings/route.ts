@@ -50,6 +50,7 @@ export async function PATCH(request: Request) {
     const data: {
       newMatches?: boolean
       newMessages?: boolean
+      newLikes?: boolean
       appUpdates?: boolean
       emailAlerts?: boolean
       profileVisibility?: string
@@ -71,6 +72,10 @@ export async function PATCH(request: Request) {
 
     if (body.appUpdates !== undefined) {
       data.appUpdates = Boolean(body.appUpdates)
+    }
+
+    if (body.newLikes !== undefined) {
+      data.newLikes = Boolean(body.newLikes)
     }
 
     if (body.emailAlerts !== undefined) {

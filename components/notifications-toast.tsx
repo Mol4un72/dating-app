@@ -12,6 +12,12 @@ type Notification = {
   createdAt: string
 }
 
+type NotificationSettings = {
+  newLikes: boolean
+  newMatches: boolean
+  newMessages: boolean
+}
+
 const TOAST_ID = 'new-notifications'
 
 export default function NotificationsToast() {
@@ -21,20 +27,23 @@ export default function NotificationsToast() {
   useEffect(() => {
     const checkNotifications = async () => {
       try {
-        const response = await fetch('/api/me/notifications', {
-          cache: 'no-store',
-        })
+        const [notificationsResponse, settingsResponse] = await Promise.all([
+          fetch('/api/me/notifications', { cache: 'no-store' }),
+          fetch('/api/me/settings', { cache: 'no-store' }),
+        ])
 
-        if (!response.ok) {
+        if (!notificationsResponse.ok || !settingsResponse.ok) {
           console.error(
-            'Notifications API error:',
-            response.status,
+            'Notifications settings API error:',
+            notificationsResponse.status,
           )
           return
         }
 
         const notifications: Notification[] =
-          await response.json()
+          await notificationsResponse.json()
+        const settings: NotificationSettings =
+          await settingsResponse.json()
 
         // Перше завантаження — просто запам'ятовуємо існуючі
         if (!initialized.current) {
@@ -61,14 +70,25 @@ export default function NotificationsToast() {
           knownIds.current.add(notification.id)
         })
 
-        const count = newNotifications.length
+        const enabledNotifications = newNotifications.filter(
+          (notification) =>
+            (notification.type === 'like' && settings.newLikes) ||
+            (notification.type === 'match' && settings.newMatches) ||
+            (notification.type === 'message' && settings.newMessages),
+        )
+
+        if (enabledNotifications.length === 0) {
+          return
+        }
+
+        const count = enabledNotifications.length
 
         // Закриваємо попередній toast
         toast.dismiss(TOAST_ID)
 
         // Показуємо ТІЛЬКИ ОДИН
         if (count === 1) {
-          const notification = newNotifications[0]
+          const notification = enabledNotifications[0]
 
           toast(notification.title, {
             id: TOAST_ID,
