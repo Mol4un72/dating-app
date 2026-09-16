@@ -79,12 +79,6 @@ export function TabPanel({
     case 'privacy':
       return (
         <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-          <div>
-            <h2 className="text-xl font-bold text-foreground">Privacy & safety</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage your profile visibility, online visibility status, and block unwanted contacts.
-            </p>
-          </div>
 
           <div className="flex flex-col gap-5">
             {/* Visibility Selector */}

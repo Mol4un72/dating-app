@@ -291,7 +291,6 @@ export default function SettingsPage() {
 
   const tabList = [
     { id: 'notifications' as TabType, label: 'Notifications', icon: Bell, desc: 'Alerts, push messages and email digests' },
-    { id: 'privacy' as TabType, label: 'Privacy & safety', icon: Shield, desc: 'Profile visibility, status, blocked contacts' },
     { id: 'preferences' as TabType, label: 'Dating preferences', icon: Heart, desc: 'Matching filters, age ranges and distance' },
     { id: 'account' as TabType, label: 'Account settings', icon: User, desc: 'Contact details, password reset, languages' },
   ]
