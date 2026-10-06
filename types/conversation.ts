@@ -7,10 +7,9 @@ export type Conversation = {
   lastMessage: string
   time: string
   unread: number
-  messages: Message[]
 }
 
-export type Message = {
+export type ChatMessage = {
   id: string
   fromMe: boolean
   text?: string
